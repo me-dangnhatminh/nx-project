@@ -1,4 +1,4 @@
-import './global.css';
+import '@libs/ui/styles/globals.css';
 
 export const metadata = {
   title: 'Welcome to dtutool-ui',
