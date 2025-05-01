@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@libs/ui/*": ["libs/ui/src/*"]
+      "@ui": ["./libs/ui/src"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,4 +1,4 @@
-import { Button } from '@libs/ui/components';
+import { Button } from '@ui/components/button';
 
 export default function Index() {
   /*
@@ -8,7 +8,7 @@ export default function Index() {
    */
   return (
     <div>
-      <Button variant="default">Hello</Button>
+      <Button variant="outline">Hello</Button>
     </div>
   );
 }
