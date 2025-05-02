@@ -8,7 +8,7 @@ export default function Index() {
    */
   return (
     <div>
-      <Button variant="outline">Hello</Button>
+      <Button variant='outline'>Hello</Button>
     </div>
   );
 }

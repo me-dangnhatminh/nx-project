@@ -45,18 +45,18 @@ export const AcademicPeriodSelector: React.FC<AcademicPeriodSelectorProps> = ({
           Academic Period Selection
         </CardTitle>
       </CardHeader> */}
-      <CardContent className="flex flex-col space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="academic">Academic Year</Label>
+      <CardContent className='flex flex-col space-y-4'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='flex flex-col gap-1'>
+            <Label htmlFor='academic'>Academic Year</Label>
             <Select
               value={academic}
               onValueChange={(academic) => {
                 onSelectedAcademic?.(academic);
               }}
             >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Academic Year" />
+              <SelectTrigger className='w-full'>
+                <SelectValue placeholder='Select Academic Year' />
               </SelectTrigger>
               <SelectContent>
                 {academics.map((academic, idx) => (
@@ -68,16 +68,16 @@ export const AcademicPeriodSelector: React.FC<AcademicPeriodSelectorProps> = ({
             </Select>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="semester">Semester</Label>
+          <div className='flex flex-col gap-1'>
+            <Label htmlFor='semester'>Semester</Label>
             <Select
               value={semester}
               onValueChange={(semester) => {
                 onSelectedSemester?.(semester);
               }}
             >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Semester" />
+              <SelectTrigger className='w-full'>
+                <SelectValue placeholder='Select Semester' />
               </SelectTrigger>
               <SelectContent>
                 {semesters.map((semester, idx: number) => (
@@ -91,15 +91,15 @@ export const AcademicPeriodSelector: React.FC<AcademicPeriodSelectorProps> = ({
         </div>
 
         {!isSearchEnabled ? (
-          <Alert variant="info" className="bg-blue-50 text-blue-800 border-blue-100">
-            <InfoIcon className="h-4 w-4" />
+          <Alert variant='info' className='bg-blue-50 text-blue-800 border-blue-100'>
+            <InfoIcon className='h-4 w-4' />
             <AlertDescription>
               Please select both Academic Year and Semester to search for courses.
             </AlertDescription>
           </Alert>
         ) : (
-          <div className="text-sm">
-            <span className="font-medium">Current selection:</span> {academic},{' '}
+          <div className='text-sm'>
+            <span className='font-medium'>Current selection:</span> {academic},{' '}
             {semesters.find((s) => s.id === semester)?.label}
           </div>
         )}

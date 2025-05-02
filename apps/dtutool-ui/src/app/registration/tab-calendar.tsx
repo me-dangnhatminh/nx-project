@@ -221,20 +221,20 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
   }, [calendarRef.current, events]);
 
   return (
-    <Card className="w-full h-full">
-      <CardContent className="space-y-2">
-        <div className="flex space-x-2">
-          <Button size="sm" variant="outline" onClick={handleGotoFirstDay}>
+    <Card className='w-full h-full'>
+      <CardContent className='space-y-2'>
+        <div className='flex space-x-2'>
+          <Button size='sm' variant='outline' onClick={handleGotoFirstDay}>
             Start Semester
           </Button>
-          <Button size="sm" variant="outline" onClick={handleGotoLastDay}>
+          <Button size='sm' variant='outline' onClick={handleGotoLastDay}>
             End Semester
           </Button>
         </div>
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="timeGridWeek"
+          initialView='timeGridWeek'
           headerToolbar={{
             left: 'prev,next today',
             center: 'title',
@@ -246,11 +246,11 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
             setSelectedEvent(info.event);
             setIsEventDialogOpen(true);
           }}
-          slotMinTime="08:00:00"
-          slotMaxTime="21:00:00"
+          slotMinTime='08:00:00'
+          slotMaxTime='21:00:00'
           allDaySlot={false}
           firstDay={1}
-          height="auto"
+          height='auto'
           aspectRatio={1.5}
           eventTimeFormat={{
             hour: '2-digit',
@@ -276,13 +276,13 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
 
         {/* Event Details Dialog */}
         <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className='sm:max-w-md'>
             <DialogHeader>
               <DialogTitle>
                 {selectedEvent?.extendedProps?.courseCode} -{' '}
                 {selectedEvent?.extendedProps?.className}
                 {selectedEvent?.extendedProps?.isMakeup && (
-                  <Badge variant="destructive" className="ml-2">
+                  <Badge variant='destructive' className='ml-2'>
                     Makeup Session
                   </Badge>
                 )}
@@ -290,16 +290,16 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
               <DialogDescription>{selectedEvent?.extendedProps?.courseName}</DialogDescription>
             </DialogHeader>
 
-            <div className="grid gap-3 py-4">
+            <div className='grid gap-3 py-4'>
               {selectedEvent?.extendedProps?.teacherName && (
-                <div className="flex items-start">
-                  <span className="text-muted-foreground min-w-[100px]">Instructor:</span>
+                <div className='flex items-start'>
+                  <span className='text-muted-foreground min-w-[100px]'>Instructor:</span>
                   <span>{selectedEvent.extendedProps.teacherName}</span>
                 </div>
               )}
 
-              <div className="flex items-center">
-                <Clock className="w-4 h-4 mr-2 text-muted-foreground" />
+              <div className='flex items-center'>
+                <Clock className='w-4 h-4 mr-2 text-muted-foreground' />
                 <span>
                   {selectedEvent &&
                     `${`${format(selectedEvent?.start || '', 'h:mm a')} - ${format(
@@ -310,8 +310,8 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
               </div>
 
               {selectedEvent?.extendedProps?.room && (
-                <div className="flex items-center">
-                  <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
+                <div className='flex items-center'>
+                  <MapPin className='w-4 h-4 mr-2 text-muted-foreground' />
                   <span>
                     Room {selectedEvent.extendedProps.room}
                     {selectedEvent.extendedProps.location &&
@@ -321,9 +321,9 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
               )}
 
               {selectedEvent?.extendedProps?.conflicted && (
-                <div className="mt-2 p-2 bg-destructive/10 rounded flex items-center">
-                  <AlertTriangle className="w-4 h-4 mr-2 text-destructive" />
-                  <span className="text-destructive text-sm">
+                <div className='mt-2 p-2 bg-destructive/10 rounded flex items-center'>
+                  <AlertTriangle className='w-4 h-4 mr-2 text-destructive' />
+                  <span className='text-destructive text-sm'>
                     This session conflicts with another course
                   </span>
                 </div>
@@ -331,7 +331,7 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsEventDialogOpen(false)}>
+              <Button variant='outline' onClick={() => setIsEventDialogOpen(false)}>
                 Close
               </Button>
             </DialogFooter>

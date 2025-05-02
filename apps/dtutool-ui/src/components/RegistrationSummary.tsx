@@ -48,24 +48,24 @@ export const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({
   return (
     <Card>
       <CardHeader>
-        <span className="text-lg font-semibold text-foreground">Registration Summary</span>
+        <span className='text-lg font-semibold text-foreground'>Registration Summary</span>
       </CardHeader>
       <CardContent>
         <SummaryItem
           icon={BookOpen}
-          label="Total Courses"
+          label='Total Courses'
           value={`${totalCourses} (${activeTotalCourses} selected)`}
         />
 
         <SummaryItem
           icon={CreditCard}
-          label="Total Credits"
+          label='Total Credits'
           value={`${totalCredits} (${activeCredits} selected)`}
         />
 
         <SummaryItem
           icon={hasConflicts ? AlertCircle : CheckCircle}
-          label="Schedule Conflicts"
+          label='Schedule Conflicts'
           value={hasConflicts ? `${conflictsCount} conflicts` : 'None'}
           valueClassName={hasConflicts ? 'text-destructive font-medium' : 'text-success'}
         />

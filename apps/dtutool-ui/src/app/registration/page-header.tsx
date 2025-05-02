@@ -25,22 +25,22 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ selectedCoursesCount, us
   }).format(currentDate);
 
   return (
-    <header ref={headerRef} className="bg-card border-b shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
+    <header ref={headerRef} className='bg-card border-b shadow-sm'>
+      <div className='max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8'>
+        <div className='flex justify-between items-center'>
           <div>
-            <h1 className="text-2xl font-bold">Course Registration System</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className='text-2xl font-bold'>Course Registration System</h1>
+            <p className='text-sm text-muted-foreground'>
               {formattedDate} •{' '}
               {selectedCoursesCount > 0
                 ? `${selectedCoursesCount} courses selected`
                 : 'No courses selected'}
             </p>
           </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground">Welcome, {username}</span>
-            <Button variant="outline" size="sm">
-              <LogOut className="h-4 w-4 mr-2" /> Logout
+          <div className='flex items-center space-x-4'>
+            <span className='text-sm text-muted-foreground'>Welcome, {username}</span>
+            <Button variant='outline' size='sm'>
+              <LogOut className='h-4 w-4 mr-2' /> Logout
             </Button>
           </div>
         </div>

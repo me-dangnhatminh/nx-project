@@ -30,10 +30,10 @@ const MyCourses: React.FC<MyCoursesProps> = ({
   return (
     <div>
       {selectedClassrooms.length > 0 && (
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
+        <div className='flex items-center justify-between mb-3'>
+          <div className='flex items-center gap-2'>
             <Checkbox
-              id="select-all-courses"
+              id='select-all-courses'
               checked={selectedClassrooms.length === activeCount && selectedClassrooms.length > 0}
               onCheckedChange={(checked) => {
                 // Create an array of indices from 0 to (length-1)
@@ -46,17 +46,17 @@ const MyCourses: React.FC<MyCoursesProps> = ({
                 }
               }}
             />
-            <Label htmlFor="select-all-courses" className="text-sm font-medium text-foreground">
+            <Label htmlFor='select-all-courses' className='text-sm font-medium text-foreground'>
               Show all on calendar
             </Label>
           </div>
-          <div className="text-xs text-muted-foreground">
+          <div className='text-xs text-muted-foreground'>
             {activeCount} of {selectedClassrooms.length} displayed
           </div>
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className='space-y-2'>
         {selectedClassrooms.map((selection, idx) => {
           const isConflicted = scheduleConflicts.find((c) => {
             const isCourse1 = c.regId1 === selection.registration.regId;

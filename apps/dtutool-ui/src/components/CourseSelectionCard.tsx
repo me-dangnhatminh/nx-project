@@ -30,23 +30,23 @@ export const CourseSelectionCard: React.FC<CourseSelectionCardProps> = ({
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg">Seleted Classrooms</CardTitle>
+        <div className='flex justify-between items-center'>
+          <CardTitle className='text-lg'>Seleted Classrooms</CardTitle>
           <Button
             hidden={tab !== 'search'}
-            variant="default"
-            size="sm"
+            variant='default'
+            size='sm'
             onClick={() => setTab('calendar')}
-            className="text-xs h-7"
+            className='text-xs h-7'
           >
             View in Calendar
           </Button>
           <Button
             hidden={tab !== 'calendar'}
-            variant="outline"
-            size="sm"
+            variant='outline'
+            size='sm'
             onClick={() => setTab('search')}
-            className="text-xs h-7"
+            className='text-xs h-7'
           >
             Back to Search
           </Button>

@@ -41,47 +41,47 @@ export const ClassroomItem: React.FC<ClassroomItemProps> = ({
         isSelected ? 'bg-primary/5 border-primary/30' : 'bg-card/60'
       }`}
     >
-      <CardContent className="flex flex-col gap-2">
-        <div className="flex justify-between items-center">
-          <span className="font-medium">{classroom.className}</span>
-          <Badge variant={getStatusVariant('Open')} className="text-xs">
+      <CardContent className='flex flex-col gap-2'>
+        <div className='flex justify-between items-center'>
+          <span className='font-medium'>{classroom.className}</span>
+          <Badge variant={getStatusVariant('Open')} className='text-xs'>
             {classroom.registration.status}
           </Badge>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center text-xs text-muted-foreground">
-            <Code className="h-3 w-3 mr-1" />
-            <span className="text-xs text-muted-foreground">{classroom.registration.regId}</span>
+        <div className='flex flex-col gap-2'>
+          <div className='flex items-center text-xs text-muted-foreground'>
+            <Code className='h-3 w-3 mr-1' />
+            <span className='text-xs text-muted-foreground'>{classroom.registration.regId}</span>
           </div>
 
           <div
             hidden={!classroom.teacher}
-            className="flex items-center text-xs text-muted-foreground"
+            className='flex items-center text-xs text-muted-foreground'
           >
-            <User className="h-3 w-3 mr-1" />
+            <User className='h-3 w-3 mr-1' />
             {classroom?.teacher?.name}
           </div>
 
-          <div className="flex items-center text-xs text-muted-foreground">
-            <Users className="h-3 w-3 mr-1" />
+          <div className='flex items-center text-xs text-muted-foreground'>
+            <Users className='h-3 w-3 mr-1' />
             <span>
               {classroom.registration.seatsLeft}{' '}
               {classroom.registration.seatsLeft > 1 ? 'seats' : 'seat'} available
             </span>
           </div>
         </div>
-        <div className="mt-2 text-xs">
-          <div className="flex items-start">
-            <Calendar className="h-3 w-3 mr-1 mt-0.5" />
-            <div className="space-y-1 flex-1">
+        <div className='mt-2 text-xs'>
+          <div className='flex items-start'>
+            <Calendar className='h-3 w-3 mr-1 mt-0.5' />
+            <div className='space-y-1 flex-1'>
               {classroom.schedule.regularSessions.map((session, idx) => (
-                <div key={idx} className="flex items-center justify-between">
+                <div key={idx} className='flex items-center justify-between'>
                   <span>
                     {format(addDays(startOfWeek(new Date()), (session.dayOfWeek + 6) % 7), 'EEEE')}
                   </span>
-                  <div className="flex items-center">
-                    <Clock className="h-3 w-3 mr-1" />
+                  <div className='flex items-center'>
+                    <Clock className='h-3 w-3 mr-1' />
                     <span>
                       {format(parse(session.startTime, 'HH:mm', new Date()), 'h:mm a')}
                       {' - '}
@@ -108,7 +108,7 @@ export const ClassroomItem: React.FC<ClassroomItemProps> = ({
                   }}
                   disabled={isSelected}
                   variant={!isSelected ? 'default' : 'outline'}
-                  className="mt-3 w-full py-1 h-8 text-xs cursor-pointer"
+                  className='mt-3 w-full py-1 h-8 text-xs cursor-pointer'
                 >
                   {isSelected ? 'Already Added' : 'Add to My Courses'}
                 </Button>

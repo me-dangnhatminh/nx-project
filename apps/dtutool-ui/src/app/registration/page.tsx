@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
-import PageClient from './page-client';
 import { headers } from 'next/headers';
+import PageClient from './page-client';
 
 const defaultMetadata: Metadata = {
   title: 'DTU Course Registration System',
@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: 'DTU Course Registration System',
     description: `Interactive course registration system with schedule conflict detection`,
     openGraph: {
-      url: raw.origin,
+      url: raw.href,
       type: 'website',
       locale: 'en_US',
       images: [

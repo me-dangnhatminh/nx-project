@@ -18,20 +18,14 @@ export async function GET(req: Request) {
     });
 
     const courseList = await getCourses(params);
-    return Response.json(courseList);
+    return Response.json(courseList, { status: 200 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errorMessage = error.errors.map((e) => e.message).join(', ');
-      return new Response(JSON.stringify({ error: errorMessage }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return Response.json({ error: errorMessage }, { status: 400 });
     }
 
     console.error(error);
-    return new Response(JSON.stringify({ error }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return Response.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

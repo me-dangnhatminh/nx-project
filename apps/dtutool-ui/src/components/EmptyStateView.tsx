@@ -13,10 +13,10 @@ export const EmptyStateView: React.FC<EmptyStateViewProps> = ({
   description,
 }) => {
   return (
-    <div className="py-10 text-center">
-      <Icon className="mx-auto h-12 w-12 text-muted-foreground/60" />
-      <h3 className="mt-2 text-sm font-medium">{title}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+    <div className='py-10 text-center'>
+      <Icon className='mx-auto h-12 w-12 text-muted-foreground/60' />
+      <h3 className='mt-2 text-sm font-medium'>{title}</h3>
+      <p className='mt-1 text-sm text-muted-foreground'>{description}</p>
     </div>
   );
 };

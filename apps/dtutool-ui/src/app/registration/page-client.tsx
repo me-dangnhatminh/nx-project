@@ -191,18 +191,18 @@ export default function PageClient() {
   if (!state.academic || !state.semester) return 'Loading ...';
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className='min-h-screen bg-muted/30'>
       <PageHeader
         scheduleConflicts={scheduleConflicts}
         selectedCoursesCount={state.selectedClassrooms.length}
-        username="me-dangnhatminh"
+        username='me-dangnhatminh'
       />
 
       <div className={cn('max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8', 'h-screen min-h-[700px]')}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
           <Tabs
-            className="lg:col-span-2"
-            defaultValue="search"
+            className='lg:col-span-2'
+            defaultValue='search'
             value={state.tab}
             onValueChange={(tab) => {
               if (tab === 'search' || tab === 'calendar') {
@@ -210,13 +210,13 @@ export default function PageClient() {
               } else console.warn(`Invalid tab value: ${tab}`);
             }}
           >
-            <div className="flex items-center justify-between">
+            <div className='flex items-center justify-between'>
               <TabsList>
-                <TabsTrigger value="search">Search</TabsTrigger>
-                <TabsTrigger value="calendar">
+                <TabsTrigger value='search'>Search</TabsTrigger>
+                <TabsTrigger value='calendar'>
                   Calendar
-                  <Badge hidden={!scheduleConflicts.length} variant="destructive" className="ml-2">
-                    <AlertCircle className="h-3 w-3 mr-1" />
+                  <Badge hidden={!scheduleConflicts.length} variant='destructive' className='ml-2'>
+                    <AlertCircle className='h-3 w-3 mr-1' />
                     Conflicts!
                   </Badge>
                 </TabsTrigger>
@@ -274,7 +274,7 @@ export default function PageClient() {
             </div>
           </Tabs>
 
-          <div className="flex flex-col space-y-6">
+          <div className='flex flex-col space-y-6'>
             <RegistrationSummary
               activeClassroomIdxs={state.activeClassroomIdxs}
               selectedClassrooms={state.selectedClassrooms}

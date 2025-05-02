@@ -20,11 +20,11 @@ export const CopyLinkButton = () => {
     <TooltipProvider>
       <Tooltip open={copied ? true : undefined}>
         <TooltipTrigger asChild>
-          <Button size="icon" className="h-8 w-8 rounded-full cursor-pointer" onClick={handleCopy}>
-            <Share className="h-4 w-4" />
+          <Button size='icon' className='h-8 w-8 rounded-full cursor-pointer' onClick={handleCopy}>
+            <Share className='h-4 w-4' />
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="top" align="center">
+        <TooltipContent side='top' align='center'>
           {copied ? 'Copied!' : 'Copy link'}
         </TooltipContent>
       </Tooltip>

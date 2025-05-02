@@ -130,81 +130,81 @@ export const CourseList: React.FC<CourseListProps> = ({
   }, [visibleRange.end, filteredCourses.length]);
 
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <h3 className="text-sm font-medium text-muted-foreground">
+    <div className='space-y-2'>
+      <div className='flex justify-between items-center'>
+        <div className='flex items-center'>
+          <h3 className='text-sm font-medium text-muted-foreground'>
             {filteredCourses.length} {filteredCourses.length === 1 ? 'course' : 'courses'} found
           </h3>
           {search && search !== localSearch && (
-            <Badge variant="secondary" className="ml-2 px-2 py-1">
+            <Badge variant='secondary' className='ml-2 px-2 py-1'>
               Search: {search}
             </Badge>
           )}
         </div>
 
-        <div className="flex gap-2">
-          <div className="relative">
+        <div className='flex gap-2'>
+          <div className='relative'>
             <Input
-              className="w-[200px] pl-8"
-              placeholder="Filter results..."
+              className='w-[200px] pl-8'
+              placeholder='Filter results...'
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
             />
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
             {localSearch && (
               <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-1 top-1 h-7 w-7"
+                variant='ghost'
+                size='icon'
+                className='absolute right-1 top-1 h-7 w-7'
                 onClick={() => setLocalSearch('')}
               >
-                <X className="h-4 w-4" />
+                <X className='h-4 w-4' />
               </Button>
             )}
           </div>
 
-          <Button size="sm" variant="outline" onClick={handleClearSearch}>
+          <Button size='sm' variant='outline' onClick={handleClearSearch}>
             Clear
           </Button>
         </div>
       </div>
 
-      <div hidden={filteredCourses.length !== 0} className="bg-card p-8 rounded-md text-center">
-        <h3 className="font-medium text-lg">No courses found</h3>
-        <p className="text-muted-foreground mt-1">Try adjusting your search criteria</p>
+      <div hidden={filteredCourses.length !== 0} className='bg-card p-8 rounded-md text-center'>
+        <h3 className='font-medium text-lg'>No courses found</h3>
+        <p className='text-muted-foreground mt-1'>Try adjusting your search criteria</p>
       </div>
       <ScrollArea
         hidden={filteredCourses.length === 0}
         ref={scrollRef}
-        className="h-[600px]"
-        type="always"
+        className='h-[600px]'
+        type='always'
       >
-        <div className="pr-3 flex flex-col space-y-2">
+        <div className='pr-3 flex flex-col space-y-2'>
           {visibleCourses.map((course) => {
             const isExpanded = expandedItems.has(course.courseInfo.courseId.toString());
             return (
-              <div key={course.courseInfo.courseId} className="border rounded-md bg-card">
+              <div key={course.courseInfo.courseId} className='border rounded-md bg-card'>
                 <div
-                  className="flex justify-between items-center p-3 cursor-pointer hover:bg-accent/50 rounded-t-md"
+                  className='flex justify-between items-center p-3 cursor-pointer hover:bg-accent/50 rounded-t-md'
                   onClick={() => toggleCourse(course.courseInfo.courseId.toString())}
                 >
                   <div>
-                    <div className="flex items-center">
-                      <span className="font-medium">{course.courseInfo.courseCode}</span>
+                    <div className='flex items-center'>
+                      <span className='font-medium'>{course.courseInfo.courseCode}</span>
 
                       <Badge
                         hidden={!course.courseInfo.courseType}
-                        variant="outline"
-                        className="ml-2 text-xs"
+                        variant='outline'
+                        className='ml-2 text-xs'
                       >
                         {course.courseInfo.courseType}
                       </Badge>
 
                       <Badge
                         hidden={!course.courseInfo.credits}
-                        variant="outline"
-                        className="ml-2 text-xs"
+                        variant='outline'
+                        className='ml-2 text-xs'
                       >
                         {course.courseInfo.credits}{' '}
                         {course.courseInfo.credits === 1 ? 'credit' : 'credits'}
@@ -212,35 +212,35 @@ export const CourseList: React.FC<CourseListProps> = ({
 
                       <Badge
                         hidden={!course.courseInfo.coRequisite}
-                        variant="outline"
-                        className="ml-2 text-xs"
+                        variant='outline'
+                        className='ml-2 text-xs'
                       >
                         Co-Req
                       </Badge>
 
                       <Badge
                         hidden={!course.courseInfo.preRequisite}
-                        variant="outline"
-                        className="ml-2 text-xs"
+                        variant='outline'
+                        className='ml-2 text-xs'
                       >
                         Pre-Req
                       </Badge>
                     </div>
-                    <div className="text-sm text-muted-foreground mt-0.5">
+                    <div className='text-sm text-muted-foreground mt-0.5'>
                       {course.courseInfo.courseName}
                     </div>
                   </div>
-                  <div className="flex items-center">
+                  <div className='flex items-center'>
                     {isExpanded ? (
-                      <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                      <ChevronUp className='h-5 w-5 text-muted-foreground' />
                     ) : (
-                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                      <ChevronDown className='h-5 w-5 text-muted-foreground' />
                     )}
                   </div>
                 </div>
 
                 {isExpanded && (
-                  <div className="p-3 pt-0">
+                  <div className='p-3 pt-0'>
                     <CourseItem
                       academic={academic}
                       semester={semester}
@@ -257,9 +257,9 @@ export const CourseList: React.FC<CourseListProps> = ({
           })}
 
           {visibleRange.end < filteredCourses.length && (
-            <div ref={loaderRef} className="py-4 text-center">
-              <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">Loading more courses...</p>
+            <div ref={loaderRef} className='py-4 text-center'>
+              <Loader2 className='h-6 w-6 animate-spin mx-auto mb-2' />
+              <p className='text-sm text-muted-foreground'>Loading more courses...</p>
             </div>
           )}
         </div>

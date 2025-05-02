@@ -72,7 +72,7 @@ const TabSearch: React.FC<TabSearchProps> = ({
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className='flex flex-col gap-4'>
       <AcademicPeriodSelector
         academics={academics}
         semesters={semesters}
@@ -85,20 +85,20 @@ const TabSearch: React.FC<TabSearchProps> = ({
       {!academic || !semester ? (
         <EmptyStateView
           icon={Calendar}
-          title="Select Academic Year and Semester"
-          description="You must select both academic year and semester to view available courses"
+          title='Select Academic Year and Semester'
+          description='You must select both academic year and semester to view available courses'
         />
       ) : fetching ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin mb-4" />
-          <p className="text-lg font-medium">Loading courses...</p>
-          <p className="text-muted-foreground">This might take a moment</p>
+        <div className='flex flex-col items-center justify-center py-12'>
+          <Loader2 className='h-8 w-8 animate-spin mb-4' />
+          <p className='text-lg font-medium'>Loading courses...</p>
+          <p className='text-muted-foreground'>This might take a moment</p>
         </div>
       ) : courses.length === 0 ? (
         <EmptyStateView
           icon={Package}
-          title="No courses found"
-          description="No courses found for the selected academic year and semester"
+          title='No courses found'
+          description='No courses found for the selected academic year and semester'
         />
       ) : (
         <CourseList

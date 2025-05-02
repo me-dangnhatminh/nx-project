@@ -18,20 +18,20 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
 }) => {
   return (
     <div>
-      <div className="flex flex-col md:flex-row">
-        <div className="flex-1 mb-3 md:mb-0">
-          <label htmlFor="search-courses" className="block text-sm font-medium mb-1">
+      <div className='flex flex-col md:flex-row'>
+        <div className='flex-1 mb-3 md:mb-0'>
+          <label htmlFor='search-courses' className='block text-sm font-medium mb-1'>
             Search Courses
           </label>
-          <div className="flex">
-            <div className="relative flex-grow">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-muted-foreground" />
+          <div className='flex'>
+            <div className='relative flex-grow'>
+              <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                <Search className='h-4 w-4 text-muted-foreground' />
               </div>
               <Input
-                id="search-courses"
-                type="search"
-                className="pl-10"
+                id='search-courses'
+                type='search'
+                className='pl-10'
                 placeholder={
                   isSearchEnabled
                     ? 'Search by course code, name, instructor...'
@@ -47,7 +47,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                 }}
               />
             </div>
-            <Button onClick={handleSearch} disabled={!isSearchEnabled} className="ml-2">
+            <Button onClick={handleSearch} disabled={!isSearchEnabled} className='ml-2'>
               Search
             </Button>
           </div>

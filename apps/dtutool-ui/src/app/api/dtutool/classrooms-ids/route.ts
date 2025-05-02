@@ -20,27 +20,19 @@ export async function GET(req: Request) {
     const params = GetClassroomsParams.parse({
       academic: searchParams.get('academic') || '',
       semester: Number(searchParams.get('semester')),
-      regIds: [searchParams.get('regIds')].flat(),
+      regIds: [searchParams.getAll('regIds')].flat(),
     });
 
     const courseDetail = await getDetailFromRegIds(params);
-    return new Response(JSON.stringify(CourseDetailNullAble.parse(courseDetail)), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+
+    return Response.json(CourseDetailNullAble.parse(courseDetail));
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errorMessage = error.errors.map((e) => e.message).join(', ');
-      return new Response(JSON.stringify({ error: errorMessage }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return Response.json({ error: errorMessage }, { status: 400 });
     }
 
     console.error(error);
-    return new Response(JSON.stringify({ error }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return Response.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

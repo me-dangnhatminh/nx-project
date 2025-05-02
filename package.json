@@ -6,7 +6,7 @@
     "dtutool-ui:dev": "nx dev dtutool-ui",
     "dtutool-ui:build": "nx build dtutool-ui",
     "dtutool-ui:start": "nx start dtutool-ui",
-    "format:all": "nx format:write"
+    "format:all": "nx format:write --all"
   },
   "private": true,
   "packageManager": "pnpm@10.10.0",
@@ -69,8 +69,5 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.19.0",
     "zod": "^3.24.3"
-  },
-  "nx": {
-    "includedScripts": []
   }
 }

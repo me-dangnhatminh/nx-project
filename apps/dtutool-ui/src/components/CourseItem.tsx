@@ -46,8 +46,8 @@ export const CourseItem = ({
   // Render loading state with min-height to prevent layout shifts
   if (!course.classrooms)
     return (
-      <div className="flex items-center justify-center py-4" style={{ minHeight: '150px' }}>
-        <Loader2 className="h-5 w-5 animate-spin mr-2" />
+      <div className='flex items-center justify-center py-4' style={{ minHeight: '150px' }}>
+        <Loader2 className='h-5 w-5 animate-spin mr-2' />
         <p>Loading sections...</p>
       </div>
     );
@@ -55,7 +55,7 @@ export const CourseItem = ({
   // Handle empty state with consistent height
   if (course.classrooms.length === 0) {
     return (
-      <div className="bg-muted/30 p-4 rounded-md text-center" style={{ minHeight: '100px' }}>
+      <div className='bg-muted/30 p-4 rounded-md text-center' style={{ minHeight: '100px' }}>
         <p>No sections available for this course</p>
       </div>
     );
@@ -67,35 +67,35 @@ export const CourseItem = ({
     : course.classrooms.slice(0, initialDisplayCount);
 
   return (
-    <div className="mt-3">
+    <div className='mt-3'>
       {course.courseInfo.description && (
         <p
-          className="text-sm text-muted-foreground mb-3"
+          className='text-sm text-muted-foreground mb-3'
           style={{ minHeight: getDescriptionHeight() }}
         >
           {course.courseInfo.description}
         </p>
       )}
 
-      <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
+      <div className='grid grid-cols-2 gap-2 mb-3 text-sm'>
         {course.courseInfo.preRequisite && (
           <div>
-            <span className="text-muted-foreground font-medium">Prerequisites:</span>{' '}
+            <span className='text-muted-foreground font-medium'>Prerequisites:</span>{' '}
             {course.courseInfo.preRequisite}
           </div>
         )}
         {course.courseInfo.coRequisite && (
           <div>
-            <span className="text-muted-foreground font-medium">Corequisites:</span>{' '}
+            <span className='text-muted-foreground font-medium'>Corequisites:</span>{' '}
             {course.courseInfo.coRequisite}
           </div>
         )}
       </div>
 
-      <Separator className="my-3" />
+      <Separator className='my-3' />
 
-      <h4 className="font-medium text-sm mb-2">Available Sections:</h4>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <h4 className='font-medium text-sm mb-2'>Available Sections:</h4>
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-3'>
         {displayClassrooms.map((classroom, idx) => {
           const registration = classroom.registration;
           const regId = registration.regId;
@@ -117,9 +117,9 @@ export const CourseItem = ({
 
       {course.classrooms.length > initialDisplayCount && (
         <Button
-          variant="ghost"
-          size="sm"
-          className="mt-3 w-full flex items-center justify-center"
+          variant='ghost'
+          size='sm'
+          className='mt-3 w-full flex items-center justify-center'
           onClick={() => setShowAll(!showAll)}
         >
           {showAll
