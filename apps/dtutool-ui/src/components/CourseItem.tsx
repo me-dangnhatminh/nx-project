@@ -1,12 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import {
-  Classroom,
-  CourseDetail,
-  CourseInfo,
-  SelectedClassroom,
-} from '@/lib/types';
+import { Classroom, CourseDetail, CourseInfo, SelectedClassroom } from '@/lib/types';
 import { Separator } from '@ui/components/separator';
 import { ClassroomItem } from './ClassroomItem';
 import { Button } from '@ui/components/button';
@@ -51,10 +46,7 @@ export const CourseItem = ({
   // Render loading state with min-height to prevent layout shifts
   if (!course.classrooms)
     return (
-      <div
-        className="flex items-center justify-center py-4"
-        style={{ minHeight: '150px' }}
-      >
+      <div className="flex items-center justify-center py-4" style={{ minHeight: '150px' }}>
         <Loader2 className="h-5 w-5 animate-spin mr-2" />
         <p>Loading sections...</p>
       </div>
@@ -63,10 +55,7 @@ export const CourseItem = ({
   // Handle empty state with consistent height
   if (course.classrooms.length === 0) {
     return (
-      <div
-        className="bg-muted/30 p-4 rounded-md text-center"
-        style={{ minHeight: '100px' }}
-      >
+      <div className="bg-muted/30 p-4 rounded-md text-center" style={{ minHeight: '100px' }}>
         <p>No sections available for this course</p>
       </div>
     );
@@ -91,17 +80,13 @@ export const CourseItem = ({
       <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
         {course.courseInfo.preRequisite && (
           <div>
-            <span className="text-muted-foreground font-medium">
-              Prerequisites:
-            </span>{' '}
+            <span className="text-muted-foreground font-medium">Prerequisites:</span>{' '}
             {course.courseInfo.preRequisite}
           </div>
         )}
         {course.courseInfo.coRequisite && (
           <div>
-            <span className="text-muted-foreground font-medium">
-              Corequisites:
-            </span>{' '}
+            <span className="text-muted-foreground font-medium">Corequisites:</span>{' '}
             {course.courseInfo.coRequisite}
           </div>
         )}
@@ -139,13 +124,9 @@ export const CourseItem = ({
         >
           {showAll
             ? 'Show Less'
-            : `Show All Sections (${
-                course.classrooms.length - initialDisplayCount
-              } more)`}
+            : `Show All Sections (${course.classrooms.length - initialDisplayCount} more)`}
           <ChevronDown
-            className={`ml-1 h-4 w-4 transition-transform ${
-              showAll ? 'rotate-180' : ''
-            }`}
+            className={`ml-1 h-4 w-4 transition-transform ${showAll ? 'rotate-180' : ''}`}
           />
         </Button>
       )}

@@ -1,2 +1,2 @@
-export * from "./check-conflic";
-export * from "./common";
+export * from './check-conflic';
+export * from './common';

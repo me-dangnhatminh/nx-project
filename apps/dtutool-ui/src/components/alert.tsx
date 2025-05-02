@@ -1,8 +1,4 @@
-import {
-  Alert as RawAlert,
-  AlertTitle,
-  AlertDescription,
-} from '@ui/components/alert';
+import { Alert as RawAlert, AlertTitle, AlertDescription } from '@ui/components/alert';
 
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
@@ -23,7 +19,7 @@ const alertVariants = cva(
     defaultVariants: {
       variant: 'default',
     },
-  }
+  },
 );
 
 function Alert({
@@ -31,12 +27,7 @@ function Alert({
   variant,
   ...props
 }: React.ComponentProps<'div'> & VariantProps<typeof alertVariants>) {
-  return (
-    <RawAlert
-      className={cn(alertVariants({ variant }), className)}
-      {...props}
-    />
-  );
+  return <RawAlert className={cn(alertVariants({ variant }), className)} {...props} />;
 }
 
 export { Alert, AlertTitle, AlertDescription };

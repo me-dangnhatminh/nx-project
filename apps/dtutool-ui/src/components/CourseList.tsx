@@ -1,12 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import {
-  Classroom,
-  CourseDetail,
-  CourseInfo,
-  SelectedClassroom,
-} from '@/lib/types';
+import { Classroom, CourseDetail, CourseInfo, SelectedClassroom } from '@/lib/types';
 import { Button } from '@ui/components/button';
 import { CourseItem } from './CourseItem';
 import { Badge } from '@ui/components/badge';
@@ -87,7 +82,7 @@ export const CourseList: React.FC<CourseListProps> = ({
           }));
         }
       },
-      { threshold: 0.1, rootMargin: '100px' }
+      { threshold: 0.1, rootMargin: '100px' },
     );
 
     observer.observe(loaderRef.current);
@@ -107,9 +102,7 @@ export const CourseList: React.FC<CourseListProps> = ({
       if (hasScroll) return element;
 
       // Continue up the tree
-      return element.parentElement
-        ? findScrollableParent(element.parentElement)
-        : null;
+      return element.parentElement ? findScrollableParent(element.parentElement) : null;
     };
 
     const scrollElement = findScrollableParent(scrollRef.current);
@@ -141,8 +134,7 @@ export const CourseList: React.FC<CourseListProps> = ({
       <div className="flex justify-between items-center">
         <div className="flex items-center">
           <h3 className="text-sm font-medium text-muted-foreground">
-            {filteredCourses.length}{' '}
-            {filteredCourses.length === 1 ? 'course' : 'courses'} found
+            {filteredCourses.length} {filteredCourses.length === 1 ? 'course' : 'courses'} found
           </h3>
           {search && search !== localSearch && (
             <Badge variant="secondary" className="ml-2 px-2 py-1">
@@ -178,14 +170,9 @@ export const CourseList: React.FC<CourseListProps> = ({
         </div>
       </div>
 
-      <div
-        hidden={filteredCourses.length !== 0}
-        className="bg-card p-8 rounded-md text-center"
-      >
+      <div hidden={filteredCourses.length !== 0} className="bg-card p-8 rounded-md text-center">
         <h3 className="font-medium text-lg">No courses found</h3>
-        <p className="text-muted-foreground mt-1">
-          Try adjusting your search criteria
-        </p>
+        <p className="text-muted-foreground mt-1">Try adjusting your search criteria</p>
       </div>
       <ScrollArea
         hidden={filteredCourses.length === 0}
@@ -195,25 +182,16 @@ export const CourseList: React.FC<CourseListProps> = ({
       >
         <div className="pr-3 flex flex-col space-y-2">
           {visibleCourses.map((course) => {
-            const isExpanded = expandedItems.has(
-              course.courseInfo.courseId.toString()
-            );
+            const isExpanded = expandedItems.has(course.courseInfo.courseId.toString());
             return (
-              <div
-                key={course.courseInfo.courseId}
-                className="border rounded-md bg-card"
-              >
+              <div key={course.courseInfo.courseId} className="border rounded-md bg-card">
                 <div
                   className="flex justify-between items-center p-3 cursor-pointer hover:bg-accent/50 rounded-t-md"
-                  onClick={() =>
-                    toggleCourse(course.courseInfo.courseId.toString())
-                  }
+                  onClick={() => toggleCourse(course.courseInfo.courseId.toString())}
                 >
                   <div>
                     <div className="flex items-center">
-                      <span className="font-medium">
-                        {course.courseInfo.courseCode}
-                      </span>
+                      <span className="font-medium">{course.courseInfo.courseCode}</span>
 
                       <Badge
                         hidden={!course.courseInfo.courseType}
@@ -281,9 +259,7 @@ export const CourseList: React.FC<CourseListProps> = ({
           {visibleRange.end < filteredCourses.length && (
             <div ref={loaderRef} className="py-4 text-center">
               <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">
-                Loading more courses...
-              </p>
+              <p className="text-sm text-muted-foreground">Loading more courses...</p>
             </div>
           )}
         </div>

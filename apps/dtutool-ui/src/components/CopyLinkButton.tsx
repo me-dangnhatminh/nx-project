@@ -1,11 +1,6 @@
 import { useRef, useState } from 'react';
 import { Button } from '@/components/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@ui/components/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ui/components/tooltip';
 import { Share } from 'lucide-react';
 
 export const CopyLinkButton = () => {
@@ -25,11 +20,7 @@ export const CopyLinkButton = () => {
     <TooltipProvider>
       <Tooltip open={copied ? true : undefined}>
         <TooltipTrigger asChild>
-          <Button
-            size="icon"
-            className="h-8 w-8 rounded-full cursor-pointer"
-            onClick={handleCopy}
-          >
+          <Button size="icon" className="h-8 w-8 rounded-full cursor-pointer" onClick={handleCopy}>
             <Share className="h-4 w-4" />
           </Button>
         </TooltipTrigger>

@@ -20,15 +20,13 @@ export const useURLParamsSetter = () => {
 
         if (classrooms.length > 0) setterP.push(`cr=${classrooms.join('|')}`);
         if (actives.length > 0) {
-          const activeString = actives
-            .map((active) => (active ? '1' : '0'))
-            .join('');
+          const activeString = actives.map((active) => (active ? '1' : '0')).join('');
           setterP.push(`as=${activeString}`);
         }
 
         router.replace(`?${setterP.join('&')}`, { scroll: false });
       },
-      400
+      400,
     );
   }, [router]);
 

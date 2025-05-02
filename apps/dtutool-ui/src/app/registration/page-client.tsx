@@ -92,18 +92,10 @@ export default function PageClient() {
 
   useEffect(
     () => {
-      const {
-        tab,
-        academic,
-        semester,
-        selectedClassrooms,
-        activeClassroomIdxs,
-      } = state;
+      const { tab, academic, semester, selectedClassrooms, activeClassroomIdxs } = state;
       if (academic == '' || state.semester == '') return;
 
-      const classrooms = selectedClassrooms.map(
-        ({ registration }) => registration.regId
-      );
+      const classrooms = selectedClassrooms.map(({ registration }) => registration.regId);
       const actives = activeClassroomIdxs;
 
       setURLParams({ tab, academic, semester, classrooms, actives });
@@ -115,7 +107,7 @@ export default function PageClient() {
       state.semester,
       state.selectedClassrooms,
       state.activeClassroomIdxs,
-    ]
+    ],
   );
 
   useEffect(() => {
@@ -134,11 +126,7 @@ export default function PageClient() {
     if (!semester) {
       semester =
         params.semester ||
-        (monthNow >= 8 && monthNow <= 12
-          ? '1'
-          : monthNow >= 1 && monthNow <= 5
-          ? '2'
-          : '3');
+        (monthNow >= 8 && monthNow <= 12 ? '1' : monthNow >= 1 && monthNow <= 5 ? '2' : '3');
     }
 
     if (params.classrooms?.length) {
@@ -210,12 +198,7 @@ export default function PageClient() {
         username="me-dangnhatminh"
       />
 
-      <div
-        className={cn(
-          'max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8',
-          'h-screen min-h-[700px]'
-        )}
-      >
+      <div className={cn('max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8', 'h-screen min-h-[700px]')}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Tabs
             className="lg:col-span-2"
@@ -232,11 +215,7 @@ export default function PageClient() {
                 <TabsTrigger value="search">Search</TabsTrigger>
                 <TabsTrigger value="calendar">
                   Calendar
-                  <Badge
-                    hidden={!scheduleConflicts.length}
-                    variant="destructive"
-                    className="ml-2"
-                  >
+                  <Badge hidden={!scheduleConflicts.length} variant="destructive" className="ml-2">
                     <AlertCircle className="h-3 w-3 mr-1" />
                     Conflicts!
                   </Badge>
@@ -272,9 +251,7 @@ export default function PageClient() {
                     const regId = classroom.registration.regId;
                     const selecteds = prev.selectedClassrooms;
                     const actives = prev.activeClassroomIdxs;
-                    const exitsIdx = selecteds.findIndex(
-                      (s) => s.registration.regId === regId
-                    );
+                    const exitsIdx = selecteds.findIndex((s) => s.registration.regId === regId);
                     if (exitsIdx !== -1) return prev;
                     const selectedClassrooms = [...selecteds, newItem];
                     const activeClassroomIdxs = [...actives, true];
@@ -314,7 +291,7 @@ export default function PageClient() {
                 setState((prev) => {
                   // Find the index of the classroom to remove
                   const idx = prev.selectedClassrooms.findIndex(
-                    (s) => s.registration.regId === regId
+                    (s) => s.registration.regId === regId,
                   );
 
                   if (idx === -1) return prev;

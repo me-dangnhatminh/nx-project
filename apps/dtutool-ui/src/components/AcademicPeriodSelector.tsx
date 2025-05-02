@@ -91,14 +91,10 @@ export const AcademicPeriodSelector: React.FC<AcademicPeriodSelectorProps> = ({
         </div>
 
         {!isSearchEnabled ? (
-          <Alert
-            variant="info"
-            className="bg-blue-50 text-blue-800 border-blue-100"
-          >
+          <Alert variant="info" className="bg-blue-50 text-blue-800 border-blue-100">
             <InfoIcon className="h-4 w-4" />
             <AlertDescription>
-              Please select both Academic Year and Semester to search for
-              courses.
+              Please select both Academic Year and Semester to search for courses.
             </AlertDescription>
           </Alert>
         ) : (

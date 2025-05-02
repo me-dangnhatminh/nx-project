@@ -11,10 +11,7 @@ interface PageHeaderProps {
   username: string;
 }
 
-export const PageHeader: React.FC<PageHeaderProps> = ({
-  selectedCoursesCount,
-  username,
-}) => {
+export const PageHeader: React.FC<PageHeaderProps> = ({ selectedCoursesCount, username }) => {
   const headerRef = React.useRef<HTMLDivElement>(null);
 
   const currentDate = new Date();
@@ -41,9 +38,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             </p>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground">
-              Welcome, {username}
-            </span>
+            <span className="text-sm text-muted-foreground">Welcome, {username}</span>
             <Button variant="outline" size="sm">
               <LogOut className="h-4 w-4 mr-2" /> Logout
             </Button>

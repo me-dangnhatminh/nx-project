@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import React from "react";
-import { ConflictResult, SelectedClassroom } from "@/lib/types";
-import { EmptyCourseList } from "./EmptyCourseList";
-import { CourseListItem } from "./CourseListItem";
-import { Checkbox } from "@ui/components/checkbox";
-import { Label } from "@ui/components/label";
+import React from 'react';
+import { ConflictResult, SelectedClassroom } from '@/lib/types';
+import { EmptyCourseList } from './EmptyCourseList';
+import { CourseListItem } from './CourseListItem';
+import { Checkbox } from '@ui/components/checkbox';
+import { Label } from '@ui/components/label';
 
 interface MyCoursesProps {
   selectedClassrooms: SelectedClassroom[];
@@ -34,16 +34,10 @@ const MyCourses: React.FC<MyCoursesProps> = ({
           <div className="flex items-center gap-2">
             <Checkbox
               id="select-all-courses"
-              checked={
-                selectedClassrooms.length === activeCount &&
-                selectedClassrooms.length > 0
-              }
+              checked={selectedClassrooms.length === activeCount && selectedClassrooms.length > 0}
               onCheckedChange={(checked) => {
                 // Create an array of indices from 0 to (length-1)
-                const indices = Array.from(
-                  { length: selectedClassrooms.length },
-                  (_, i) => i
-                );
+                const indices = Array.from({ length: selectedClassrooms.length }, (_, i) => i);
 
                 if (checked) {
                   if (onClassroomActive) onClassroomActive(indices);
@@ -52,10 +46,7 @@ const MyCourses: React.FC<MyCoursesProps> = ({
                 }
               }}
             />
-            <Label
-              htmlFor="select-all-courses"
-              className="text-sm font-medium text-foreground"
-            >
+            <Label htmlFor="select-all-courses" className="text-sm font-medium text-foreground">
               Show all on calendar
             </Label>
           </div>

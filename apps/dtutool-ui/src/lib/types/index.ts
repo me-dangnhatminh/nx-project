@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const CourseInfoSchema = z.object({
   courseId: z.number(),
@@ -104,7 +104,7 @@ export type CourseSelection = {
 };
 
 export interface ConflictResult {
-  type: "regular-regular" | "makeup-regular" | "makeup-makeup";
+  type: 'regular-regular' | 'makeup-regular' | 'makeup-makeup';
   regId1: string;
   regId2: string;
   dayOfWeek?: number;

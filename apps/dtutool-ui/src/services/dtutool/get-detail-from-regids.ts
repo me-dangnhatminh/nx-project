@@ -1,13 +1,13 @@
-import { CourseDetail, CourseInfo } from "@/lib/types";
+import { CourseDetail, CourseInfo } from '@/lib/types';
 
-import { getCourseClass } from "./get-course-class";
-import { getAcademicProgramName } from "./academic-program";
-import { getCourses } from "./get-courses";
+import { getCourseClass } from './get-course-class';
+import { getAcademicProgramName } from './academic-program';
+import { getCourses } from './get-courses';
 
 export const parseRegistrationCode = (code: string) => {
   const regex = /^([A-Z]+)([0-9]+)([0-9]{4})([0-9]{2})([0-9]{3})$/;
   const match = code.match(regex);
-  if (!match) throw new Error("Invalid course code format");
+  if (!match) throw new Error('Invalid course code format');
   const programPrefix = match[1];
   const courseNumber = parseInt(match[2]);
   const year = parseInt(match[3]);
@@ -84,7 +84,7 @@ export const getDetailFromRegIds = async (params: {
       if (!find) return null;
       courseClass.classrooms = [find];
       return courseClass;
-    })
+    }),
   );
 
   return classrooms;

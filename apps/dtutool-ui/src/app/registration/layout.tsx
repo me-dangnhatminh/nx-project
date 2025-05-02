@@ -12,8 +12,7 @@ export const metadata: Metadata = {
     default: 'DTU Course Registration System',
     template: '%s | DTU Course Registration',
   },
-  description:
-    'Interactive course registration system with schedule conflict detection',
+  description: 'Interactive course registration system with schedule conflict detection',
   keywords: [
     'course registration',
     'university',

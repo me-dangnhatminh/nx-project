@@ -1,20 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Classroom,
-  CourseDetail,
-  CourseInfo,
-  SelectedClassroom,
-} from '@/lib/types';
+import { Classroom, CourseDetail, CourseInfo, SelectedClassroom } from '@/lib/types';
 
 import { Calendar, Package, Loader2 } from 'lucide-react';
 import dtutoolApi from '@/lib/apis/dtutool-api';
-import {
-  CourseList,
-  EmptyStateView,
-  AcademicPeriodSelector,
-} from '@/components';
+import { CourseList, EmptyStateView, AcademicPeriodSelector } from '@/components';
 
 // gen 4 item from now
 const now = new Date();
@@ -63,23 +54,21 @@ const TabSearch: React.FC<TabSearchProps> = ({
         .finally(() => setFetching(false));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [academic, semester]
+    [academic, semester],
   );
 
   const onFetchCourse = useCallback(
     (course: CourseDetail) => {
       setCourses((prev) => {
         if (!prev) return prev;
-        const idx = prev.findIndex(
-          (c) => c.courseInfo.courseId === course.courseInfo.courseId
-        );
+        const idx = prev.findIndex((c) => c.courseInfo.courseId === course.courseInfo.courseId);
         if (idx === -1) return prev;
         const updatedCourses = [...prev];
         updatedCourses[idx] = course;
         return updatedCourses;
       });
     },
-    [setCourses]
+    [setCourses],
   );
 
   return (

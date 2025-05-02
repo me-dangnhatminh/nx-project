@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dtutool-ui:dev": "nx dev dtutool-ui"
+    "dtutool-ui:dev": "nx dev dtutool-ui",
+    "dtutool-ui:build": "nx build dtutool-ui",
+    "dtutool-ui:start": "nx start dtutool-ui",
+    "format:all": "nx format:write"
   },
   "private": true,
   "packageManager": "pnpm@10.10.0",

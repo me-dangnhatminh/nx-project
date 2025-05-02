@@ -1,11 +1,6 @@
-import {
-  CourseDetail,
-  CourseDetailSchema,
-  CourseInfo,
-  CourseInfoSchema,
-} from "@/lib/types";
-import axios from "axios";
-import qs from "qs";
+import { CourseDetail, CourseDetailSchema, CourseInfo, CourseInfoSchema } from '@/lib/types';
+import axios from 'axios';
+import qs from 'qs';
 
 const fetchCourses = async (params: {
   academic: string;
@@ -13,13 +8,13 @@ const fetchCourses = async (params: {
   search?: string;
 }): Promise<CourseInfo[]> => {
   try {
-    const res = await axios.get("/api/dtutool/courses", {
+    const res = await axios.get('/api/dtutool/courses', {
       params,
-      paramsSerializer: (p) => qs.stringify(p, { arrayFormat: "repeat" }),
+      paramsSerializer: (p) => qs.stringify(p, { arrayFormat: 'repeat' }),
     });
     return CourseInfoSchema.array().parse(res.data);
   } catch (error) {
-    console.error("Error fetching courses:", error);
+    console.error('Error fetching courses:', error);
     throw error;
   }
 };
@@ -30,10 +25,10 @@ const fetchClassrooms = async (params: {
   courseId: number;
 }): Promise<CourseDetail> => {
   try {
-    const res = await axios.get("/api/dtutool/classrooms", { params });
+    const res = await axios.get('/api/dtutool/classrooms', { params });
     return CourseDetailSchema.parse(res.data);
   } catch (error) {
-    console.error("Error fetching classrooms:", error);
+    console.error('Error fetching classrooms:', error);
     throw error;
   }
 };
@@ -44,13 +39,13 @@ const fetchClassroomsByRegIds = async (params: {
   regIds: string[];
 }): Promise<(CourseDetail | null)[]> => {
   try {
-    const res = await axios.get("/api/dtutool/classrooms-ids", {
+    const res = await axios.get('/api/dtutool/classrooms-ids', {
       params,
-      paramsSerializer: (p) => qs.stringify(p, { arrayFormat: "repeat" }),
+      paramsSerializer: (p) => qs.stringify(p, { arrayFormat: 'repeat' }),
     });
     return CourseDetailSchema.nullable().array().parse(res.data);
   } catch (error) {
-    console.error("Error fetching classrooms by regIds:", error);
+    console.error('Error fetching classrooms by regIds:', error);
     throw error;
   }
 };

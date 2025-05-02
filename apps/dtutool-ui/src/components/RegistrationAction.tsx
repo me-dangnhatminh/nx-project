@@ -21,11 +21,7 @@ export const RegistrationAction: React.FC<RegistrationActionProps> = ({
     <div className="pt-3">
       <Separator className="mb-3" />
 
-      <Button
-        disabled={isDisabled}
-        variant={isDisabled ? 'outline' : 'success'}
-        className="w-full"
-      >
+      <Button disabled={isDisabled} variant={isDisabled ? 'outline' : 'success'} className="w-full">
         Complete Registration
       </Button>
 

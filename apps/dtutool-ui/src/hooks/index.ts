@@ -1,1 +1,1 @@
-export * from "./useURLParamsSetter";
+export * from './useURLParamsSetter';

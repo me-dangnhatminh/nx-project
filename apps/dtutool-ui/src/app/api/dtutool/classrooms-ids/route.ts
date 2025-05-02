@@ -24,13 +24,10 @@ export async function GET(req: Request) {
     });
 
     const courseDetail = await getDetailFromRegIds(params);
-    return new Response(
-      JSON.stringify(CourseDetailNullAble.parse(courseDetail)),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    return new Response(JSON.stringify(CourseDetailNullAble.parse(courseDetail)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errorMessage = error.errors.map((e) => e.message).join(', ');

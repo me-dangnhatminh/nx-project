@@ -1,9 +1,4 @@
-import {
-  CourseDetail,
-  CourseDetailSchema,
-  CourseInfo,
-  CourseInfoSchema,
-} from '@/lib/types';
+import { CourseDetail, CourseDetailSchema, CourseInfo, CourseInfoSchema } from '@/lib/types';
 import axios from 'axios';
 import qs from 'qs';
 

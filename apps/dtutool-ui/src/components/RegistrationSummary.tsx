@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React, { useMemo } from "react";
-import { ConflictResult, SelectedClassroom } from "@/lib/types";
-import { SummaryItem } from "./SummaryItem";
-import { Card, CardContent, CardHeader } from "@ui/components/card";
-import { CheckCircle, AlertCircle, BookOpen, CreditCard } from "lucide-react";
+import React, { useMemo } from 'react';
+import { ConflictResult, SelectedClassroom } from '@/lib/types';
+import { SummaryItem } from './SummaryItem';
+import { Card, CardContent, CardHeader } from '@ui/components/card';
+import { CheckCircle, AlertCircle, BookOpen, CreditCard } from 'lucide-react';
 
 interface RegistrationSummaryProps {
   selectedClassrooms: SelectedClassroom[];
@@ -48,9 +48,7 @@ export const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({
   return (
     <Card>
       <CardHeader>
-        <span className="text-lg font-semibold text-foreground">
-          Registration Summary
-        </span>
+        <span className="text-lg font-semibold text-foreground">Registration Summary</span>
       </CardHeader>
       <CardContent>
         <SummaryItem
@@ -68,10 +66,8 @@ export const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({
         <SummaryItem
           icon={hasConflicts ? AlertCircle : CheckCircle}
           label="Schedule Conflicts"
-          value={hasConflicts ? `${conflictsCount} conflicts` : "None"}
-          valueClassName={
-            hasConflicts ? "text-destructive font-medium" : "text-success"
-          }
+          value={hasConflicts ? `${conflictsCount} conflicts` : 'None'}
+          valueClassName={hasConflicts ? 'text-destructive font-medium' : 'text-success'}
         />
       </CardContent>
     </Card>

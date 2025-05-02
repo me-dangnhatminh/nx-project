@@ -45,7 +45,7 @@ function generateCourseColor(courseCode: string): string {
 
 const mapClassroomToEvent = (
   selectedClassrooms: SelectedClassroom[],
-  activeClassroomIdxs: boolean[]
+  activeClassroomIdxs: boolean[],
 ): CalendarEvent[] => {
   const events: CalendarEvent[] = [];
 
@@ -68,49 +68,43 @@ const mapClassroomToEvent = (
     // weeks when monday is first of week
 
     // Generate events for regular sessions
-    regularSessions.forEach(
-      ({ dayOfWeek, startTime, endTime, room, location, excludedWeeks }) => {
-        const excludedWeeksSet = new Set(excludedWeeks);
+    regularSessions.forEach(({ dayOfWeek, startTime, endTime, room, location, excludedWeeks }) => {
+      const excludedWeeksSet = new Set(excludedWeeks);
 
-        for (
-          let week = schedule.weeks.from;
-          week <= schedule.weeks.to;
-          week++
-        ) {
-          if (excludedWeeksSet.has(week)) continue;
+      for (let week = schedule.weeks.from; week <= schedule.weeks.to; week++) {
+        if (excludedWeeksSet.has(week)) continue;
 
-          const mondayOfWeek = addWeeks(fristMondayAcademic, week - 1);
-          // dayOfWeek is a number from 0 to 6 (0 is Sunday, 6 is Saturday)
-          const normalizedDayOfWeek = (dayOfWeek + 7) % 7;
-          const offsetDays = normalizedDayOfWeek - 1;
-          const dayOfSessionDate = addDays(mondayOfWeek, offsetDays);
+        const mondayOfWeek = addWeeks(fristMondayAcademic, week - 1);
+        // dayOfWeek is a number from 0 to 6 (0 is Sunday, 6 is Saturday)
+        const normalizedDayOfWeek = (dayOfWeek + 7) % 7;
+        const offsetDays = normalizedDayOfWeek - 1;
+        const dayOfSessionDate = addDays(mondayOfWeek, offsetDays);
 
-          const start = parse(startTime, 'HH:mm', dayOfSessionDate);
-          const end = parse(endTime, 'HH:mm', dayOfSessionDate);
+        const start = parse(startTime, 'HH:mm', dayOfSessionDate);
+        const end = parse(endTime, 'HH:mm', dayOfSessionDate);
 
-          events.push({
-            id: `${regId}-r-${dayOfWeek}-${startTime}-${week}`,
-            title: `${courseCode} - ${className}`,
-            start,
-            end,
-            allDay: false,
-            classroomId: regId,
-            courseId: course.courseId,
-            backgroundColor: color,
-            borderColor: color,
-            extendedProps: {
-              room,
-              location,
-              isMakeup: false,
-              courseCode,
-              courseName,
-              className,
-              teacherName: teacher?.name,
-            },
-          });
-        }
+        events.push({
+          id: `${regId}-r-${dayOfWeek}-${startTime}-${week}`,
+          title: `${courseCode} - ${className}`,
+          start,
+          end,
+          allDay: false,
+          classroomId: regId,
+          courseId: course.courseId,
+          backgroundColor: color,
+          borderColor: color,
+          extendedProps: {
+            room,
+            location,
+            isMakeup: false,
+            courseCode,
+            courseName,
+            className,
+            teacherName: teacher?.name,
+          },
+        });
       }
-    );
+    });
 
     // Add makeup sessions
     makeupSessions.forEach((session) => {
@@ -122,13 +116,7 @@ const mapClassroomToEvent = (
       const [endHour, endMinute] = endTime.split(':').map(Number);
 
       // Create start and end Date objects (month is 0-indexed in JS Date)
-      const startDateTime = new Date(
-        year,
-        month - 1,
-        day,
-        startHour,
-        startMinute
-      );
+      const startDateTime = new Date(year, month - 1, day, startHour, startMinute);
       const endDateTime = new Date(year, month - 1, day, endHour, endMinute);
 
       events.push({
@@ -169,16 +157,11 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
   scheduleConflicts,
 }) => {
   const calendarRef = useRef<FullCalendar>(null);
-  const [selectedEvent, setSelectedEvent] = useState<
-    EventImpl | CalendarEvent | null
-  >(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventImpl | CalendarEvent | null>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
 
   const events = useMemo(() => {
-    const allEvents = mapClassroomToEvent(
-      selectedClassrooms,
-      activeClassroomIdxs
-    );
+    const allEvents = mapClassroomToEvent(selectedClassrooms, activeClassroomIdxs);
 
     // Mark conflicting events
     if (scheduleConflicts.length > 0) {
@@ -186,8 +169,7 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
         // Check if this event is part of a conflict
         const isConflicted = scheduleConflicts.some(
           (conflict) =>
-            conflict.regId1 === event.classroomId ||
-            conflict.regId2 === event.classroomId
+            conflict.regId1 === event.classroomId || conflict.regId2 === event.classroomId,
         );
 
         if (isConflicted) {
@@ -221,7 +203,7 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
       if (fistDay) calendarApi.gotoDate(fistDay);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [calendarRef.current, events]
+    [calendarRef.current, events],
   );
 
   const handleGotoLastDay = useCallback(() => {
@@ -305,17 +287,13 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
                   </Badge>
                 )}
               </DialogTitle>
-              <DialogDescription>
-                {selectedEvent?.extendedProps?.courseName}
-              </DialogDescription>
+              <DialogDescription>{selectedEvent?.extendedProps?.courseName}</DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-3 py-4">
               {selectedEvent?.extendedProps?.teacherName && (
                 <div className="flex items-start">
-                  <span className="text-muted-foreground min-w-[100px]">
-                    Instructor:
-                  </span>
+                  <span className="text-muted-foreground min-w-[100px]">Instructor:</span>
                   <span>{selectedEvent.extendedProps.teacherName}</span>
                 </div>
               )}
@@ -324,10 +302,10 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
                 <Clock className="w-4 h-4 mr-2 text-muted-foreground" />
                 <span>
                   {selectedEvent &&
-                    `${`${format(
-                      selectedEvent?.start || '',
-                      'h:mm a'
-                    )} - ${format(selectedEvent?.end || '', 'h:mm a')}`}`}
+                    `${`${format(selectedEvent?.start || '', 'h:mm a')} - ${format(
+                      selectedEvent?.end || '',
+                      'h:mm a',
+                    )}`}`}
                 </span>
               </div>
 
@@ -353,10 +331,7 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
             </div>
 
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsEventDialogOpen(false)}
-              >
+              <Button variant="outline" onClick={() => setIsEventDialogOpen(false)}>
                 Close
               </Button>
             </DialogFooter>

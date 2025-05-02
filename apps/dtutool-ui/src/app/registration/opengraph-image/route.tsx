@@ -1,20 +1,20 @@
-import { getDetailFromRegIds } from "@/services/dtutool";
-import { ImageResponse } from "next/og";
+import { getDetailFromRegIds } from '@/services/dtutool';
+import { ImageResponse } from 'next/og';
 
-export const runtime = "edge";
+export const runtime = 'edge';
 
 export async function GET(req: Request) {
   const rawURL = new URL(req.url);
   const query = new URLSearchParams(rawURL.search);
 
-  let textList: string[] = ["DTU Course Registration System"];
+  let textList: string[] = ['DTU Course Registration System'];
 
   try {
-    const cr = query.get("cr");
-    const semester = query.get("s");
-    const academic = query.get("a");
+    const cr = query.get('cr');
+    const semester = query.get('s');
+    const academic = query.get('a');
     if (cr && semester && academic) {
-      const regIds = cr.split("|");
+      const regIds = cr.split('|');
       const detail = await getDetailFromRegIds({
         regIds,
         semester: parseInt(semester),
@@ -33,7 +33,7 @@ export async function GET(req: Request) {
       ];
     }
   } catch (error) {
-    console.error("Error fetching course details:", error);
+    console.error('Error fetching course details:', error);
   }
 
   return new ImageResponse(
@@ -41,13 +41,13 @@ export async function GET(req: Request) {
       <div
         style={{
           fontSize: 32,
-          background: "white",
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
+          background: 'white',
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
         }}
       >
         {textList.map((text, index) => (
@@ -55,6 +55,6 @@ export async function GET(req: Request) {
         ))}
       </div>
     ),
-    { width: 1200, height: 630 }
+    { width: 1200, height: 630 },
   );
 }

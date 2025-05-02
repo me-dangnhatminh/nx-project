@@ -1,11 +1,11 @@
 export const dtuParamsMapper = {
   toDTU: (params: { semester: number; academic: string }) => {
     const { semester, academic } = params;
-    const year = academic.split("-").map(Number);
+    const year = academic.split('-').map(Number);
     const startYear = year[0];
     const endYear = year[1];
     if (endYear - startYear !== 1) {
-      throw new Error("Invalid year format, eg: 2024-2025");
+      throw new Error('Invalid year format, eg: 2024-2025');
     }
     const baseYear = 2022;
     const baseId = 78;

@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@ui/components/card";
-import { Button } from "@ui/components/button";
-import { ConflictResult, SelectedClassroom } from "@/lib/types";
-import MyCourses from "./MyCourses";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/card';
+import { Button } from '@ui/components/button';
+import { ConflictResult, SelectedClassroom } from '@/lib/types';
+import MyCourses from './MyCourses';
 
 interface CourseSelectionCardProps {
-  tab: "search" | "calendar";
+  tab: 'search' | 'calendar';
   scheduleConflicts: ConflictResult[];
-  setTab: (tab: "search" | "calendar") => void;
+  setTab: (tab: 'search' | 'calendar') => void;
   selectedClassrooms: SelectedClassroom[];
   activeClassroomIdxs: boolean[];
   onRemoveClassroom?: (classroomId: string) => void;
@@ -33,19 +33,19 @@ export const CourseSelectionCard: React.FC<CourseSelectionCardProps> = ({
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg">Seleted Classrooms</CardTitle>
           <Button
-            hidden={tab !== "search"}
+            hidden={tab !== 'search'}
             variant="default"
             size="sm"
-            onClick={() => setTab("calendar")}
+            onClick={() => setTab('calendar')}
             className="text-xs h-7"
           >
             View in Calendar
           </Button>
           <Button
-            hidden={tab !== "calendar"}
+            hidden={tab !== 'calendar'}
             variant="outline"
             size="sm"
-            onClick={() => setTab("search")}
+            onClick={() => setTab('search')}
             className="text-xs h-7"
           >
             Back to Search

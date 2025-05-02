@@ -4,21 +4,16 @@ import {
   MakeupSessionInfo,
   SelectedClassroom,
   ConflictResult,
-} from "@/lib/types";
+} from '@/lib/types';
 
 // Hàm chuyển đổi thời gian từ chuỗi "HH:MM" sang số phút
 function timeToMinutes(time: string): number {
-  const [hours, minutes] = time.split(":").map(Number);
+  const [hours, minutes] = time.split(':').map(Number);
   return hours * 60 + minutes;
 }
 
 // Kiểm tra xung đột giữa hai khoảng thời gian
-function isTimeOverlap(
-  start1: number,
-  end1: number,
-  start2: number,
-  end2: number
-): boolean {
+function isTimeOverlap(start1: number, end1: number, start2: number, end2: number): boolean {
   return start1 < end2 && start2 < end1;
 }
 
@@ -27,7 +22,7 @@ function checkRegularSessionConflict(
   session1: RegularSession,
   session2: RegularSession,
   classroom1: Classroom,
-  classroom2: Classroom
+  classroom2: Classroom,
 ): ConflictResult | null {
   // Nếu khác thứ trong tuần thì không xung đột
   if (session1.dayOfWeek !== session2.dayOfWeek) {
@@ -46,14 +41,8 @@ function checkRegularSessionConflict(
   }
 
   // Kiểm tra tuần học có trùng nhau không
-  const weeks1 = getWeekRange(
-    classroom1.schedule.weeks,
-    session1.excludedWeeks
-  );
-  const weeks2 = getWeekRange(
-    classroom2.schedule.weeks,
-    session2.excludedWeeks
-  );
+  const weeks1 = getWeekRange(classroom1.schedule.weeks, session1.excludedWeeks);
+  const weeks2 = getWeekRange(classroom2.schedule.weeks, session2.excludedWeeks);
 
   // Tìm các tuần trùng nhau
   const overlappingWeeks = findOverlappingWeeks(weeks1, weeks2);
@@ -63,7 +52,7 @@ function checkRegularSessionConflict(
   }
 
   return {
-    type: "regular-regular",
+    type: 'regular-regular',
     regId1: classroom1.registration.regId,
     regId2: classroom2.registration.regId,
     dayOfWeek: session1.dayOfWeek,
@@ -76,10 +65,7 @@ function checkRegularSessionConflict(
 }
 
 // Lấy danh sách tuần học thực tế (loại bỏ các tuần nghỉ)
-function getWeekRange(
-  weeks: { from: number; to: number },
-  excludedWeeks: number[]
-): number[] {
+function getWeekRange(weeks: { from: number; to: number }, excludedWeeks: number[]): number[] {
   const result: number[] = [];
   for (let week = weeks.from; week <= weeks.to; week++) {
     if (!excludedWeeks.includes(week)) {
@@ -99,7 +85,7 @@ function checkMakeupRegularConflict(
   makeup: MakeupSessionInfo,
   regular: RegularSession,
   makeupClassroom: Classroom,
-  regularClassroom: Classroom
+  regularClassroom: Classroom,
 ): ConflictResult | null {
   // Xác định thứ trong tuần của buổi học bù
   const makeupDate = new Date(makeup.date);
@@ -110,16 +96,10 @@ function checkMakeupRegularConflict(
   }
 
   // Xác định tuần của buổi học bù
-  const makeupWeek = getWeekNumber(
-    makeupDate,
-    regularClassroom.registration.startDate
-  );
+  const makeupWeek = getWeekNumber(makeupDate, regularClassroom.registration.startDate);
 
   // Kiểm tra xem tuần này có phải là tuần học của lớp thông thường không
-  const regularWeeks = getWeekRange(
-    regularClassroom.schedule.weeks,
-    regular.excludedWeeks
-  );
+  const regularWeeks = getWeekRange(regularClassroom.schedule.weeks, regular.excludedWeeks);
   if (!regularWeeks.includes(makeupWeek)) {
     return null;
   }
@@ -135,7 +115,7 @@ function checkMakeupRegularConflict(
   }
 
   return {
-    type: "makeup-regular",
+    type: 'makeup-regular',
     regId1: makeupClassroom.registration.regId,
     regId2: regularClassroom.registration.regId,
     date: makeup.date,
@@ -160,7 +140,7 @@ function checkMakeupConflict(
   makeup1: MakeupSessionInfo,
   makeup2: MakeupSessionInfo,
   classroom1: Classroom,
-  classroom2: Classroom
+  classroom2: Classroom,
 ): ConflictResult | null {
   // Nếu không cùng ngày thì không xung đột
   if (makeup1.date !== makeup2.date) {
@@ -178,7 +158,7 @@ function checkMakeupConflict(
   }
 
   return {
-    type: "makeup-makeup",
+    type: 'makeup-makeup',
     regId1: classroom1.registration.regId,
     regId2: classroom2.registration.regId,
     date: makeup1.date,
@@ -190,9 +170,7 @@ function checkMakeupConflict(
 }
 
 // Hàm chính để kiểm tra xung đột giữa các khóa học
-export function checkScheduleConflicts(
-  classrooms: SelectedClassroom[]
-): ConflictResult[] {
+export function checkScheduleConflicts(classrooms: SelectedClassroom[]): ConflictResult[] {
   const conflicts: ConflictResult[] = [];
 
   // So sánh từng cặp lớp học
@@ -204,12 +182,7 @@ export function checkScheduleConflicts(
       // Kiểm tra xung đột giữa các buổi học thông thường
       for (const session1 of classroom1.schedule.regularSessions) {
         for (const session2 of classroom2.schedule.regularSessions) {
-          const conflict = checkRegularSessionConflict(
-            session1,
-            session2,
-            classroom1,
-            classroom2
-          );
+          const conflict = checkRegularSessionConflict(session1, session2, classroom1, classroom2);
           if (conflict) {
             conflicts.push(conflict);
           }
@@ -219,12 +192,7 @@ export function checkScheduleConflicts(
       // Kiểm tra xung đột giữa buổi bù và buổi học thông thường
       for (const makeup of classroom1.schedule.makeupSessions) {
         for (const regular of classroom2.schedule.regularSessions) {
-          const conflict = checkMakeupRegularConflict(
-            makeup,
-            regular,
-            classroom1,
-            classroom2
-          );
+          const conflict = checkMakeupRegularConflict(makeup, regular, classroom1, classroom2);
           if (conflict) {
             conflicts.push(conflict);
           }
@@ -234,12 +202,7 @@ export function checkScheduleConflicts(
       // Kiểm tra xung đột giữa buổi học thông thường và buổi bù (ngược lại)
       for (const regular of classroom1.schedule.regularSessions) {
         for (const makeup of classroom2.schedule.makeupSessions) {
-          const conflict = checkMakeupRegularConflict(
-            makeup,
-            regular,
-            classroom2,
-            classroom1
-          );
+          const conflict = checkMakeupRegularConflict(makeup, regular, classroom2, classroom1);
           if (conflict) {
             conflicts.push(conflict);
           }
@@ -249,12 +212,7 @@ export function checkScheduleConflicts(
       // Kiểm tra xung đột giữa các buổi bù
       for (const makeup1 of classroom1.schedule.makeupSessions) {
         for (const makeup2 of classroom2.schedule.makeupSessions) {
-          const conflict = checkMakeupConflict(
-            makeup1,
-            makeup2,
-            classroom1,
-            classroom2
-          );
+          const conflict = checkMakeupConflict(makeup1, makeup2, classroom1, classroom2);
           if (conflict) {
             conflicts.push(conflict);
           }
