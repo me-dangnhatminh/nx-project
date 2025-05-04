@@ -1,13 +1,18 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Classroom, CourseDetail, CourseInfo, SelectedClassroom } from '@/lib/types';
-import { Button } from '@ui/components/button';
+import { Classroom, CourseDetail, CourseInfo, SelectedClassroom } from '@shared/types/dtutool';
+import { Button } from '@shadcn-ui/components/button';
 import { CourseItem } from './CourseItem';
-import { Badge } from '@ui/components/badge';
-import { Input } from '@ui/components/input';
-import { Search, X, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
-import { ScrollArea } from '@ui/components/scroll-area';
+import { Badge } from '@shadcn-ui/components/badge';
+import { Input } from '@shadcn-ui/components/input';
+import { Search, X, ChevronDown, ChevronUp, Loader2, Filter } from 'lucide-react';
+import { ScrollArea } from '@shadcn-ui/components/scroll-area';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@shadcn-ui/components/dropdown-menu';
 
 interface CourseListProps {
   academic: string;
@@ -33,6 +38,7 @@ export const CourseList: React.FC<CourseListProps> = ({
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [localSearch, setLocalSearch] = useState(search || '');
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
 
@@ -131,22 +137,55 @@ export const CourseList: React.FC<CourseListProps> = ({
 
   return (
     <div className='space-y-2'>
-      <div className='flex justify-between items-center'>
+      {/* Header section - responsive layout for mobile and desktop */}
+      <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0'>
         <div className='flex items-center'>
           <h3 className='text-sm font-medium text-muted-foreground'>
             {filteredCourses.length} {filteredCourses.length === 1 ? 'course' : 'courses'} found
           </h3>
           {search && search !== localSearch && (
-            <Badge variant='secondary' className='ml-2 px-2 py-1'>
+            <Badge variant='secondary' className='ml-2 px-2 py-0.5 text-xs'>
               Search: {search}
             </Badge>
           )}
         </div>
 
-        <div className='flex gap-2'>
-          <div className='relative'>
+        {/* Responsive search controls */}
+        <div className='flex w-full sm:w-auto gap-2'>
+          {/* Mobile filter button */}
+          <DropdownMenu open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <DropdownMenuTrigger asChild className='sm:hidden'>
+              <Button variant='outline' size='icon' className='h-9 w-9'>
+                <Filter className='h-4 w-4' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end' className='w-[200px]'>
+              <div className='p-2'>
+                <Input
+                  className='mb-2'
+                  placeholder='Filter results...'
+                  value={localSearch}
+                  onChange={(e) => setLocalSearch(e.target.value)}
+                />
+                <Button
+                  size='sm'
+                  variant='outline'
+                  className='w-full'
+                  onClick={() => {
+                    handleClearSearch?.();
+                    setIsFilterOpen(false);
+                  }}
+                >
+                  Clear
+                </Button>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Desktop search input */}
+          <div className='relative flex-1 sm:flex-initial hidden sm:block'>
             <Input
-              className='w-[200px] pl-8'
+              className='w-full sm:w-[200px] pl-8'
               placeholder='Filter results...'
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
@@ -164,20 +203,54 @@ export const CourseList: React.FC<CourseListProps> = ({
             )}
           </div>
 
-          <Button size='sm' variant='outline' onClick={handleClearSearch}>
+          {/* Mobile search input */}
+          <div className='relative flex-1 sm:hidden'>
+            <Input
+              className='w-full pl-8'
+              placeholder='Filter results...'
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+            />
+            <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+            {localSearch && (
+              <Button
+                variant='ghost'
+                size='icon'
+                className='absolute right-1 top-1 h-7 w-7'
+                onClick={() => setLocalSearch('')}
+              >
+                <X className='h-4 w-4' />
+              </Button>
+            )}
+          </div>
+
+          <Button
+            size='sm'
+            variant='outline'
+            onClick={handleClearSearch}
+            className='hidden sm:inline-flex'
+          >
             Clear
           </Button>
         </div>
       </div>
 
-      <div hidden={filteredCourses.length !== 0} className='bg-card p-8 rounded-md text-center'>
-        <h3 className='font-medium text-lg'>No courses found</h3>
-        <p className='text-muted-foreground mt-1'>Try adjusting your search criteria</p>
+      {/* No courses message */}
+      <div
+        hidden={filteredCourses.length !== 0}
+        className='bg-card p-4 sm:p-8 rounded-md text-center'
+      >
+        <h3 className='font-medium text-base sm:text-lg'>No courses found</h3>
+        <p className='text-sm sm:text-base text-muted-foreground mt-1'>
+          Try adjusting your search criteria
+        </p>
       </div>
+
+      {/* Course list with responsive height */}
       <ScrollArea
         hidden={filteredCourses.length === 0}
         ref={scrollRef}
-        className='h-[600px]'
+        className='h-[400px] sm:h-[500px] md:h-[600px]'
         type='always'
       >
         <div className='pr-3 flex flex-col space-y-2'>
@@ -185,62 +258,68 @@ export const CourseList: React.FC<CourseListProps> = ({
             const isExpanded = expandedItems.has(course.courseInfo.courseId.toString());
             return (
               <div key={course.courseInfo.courseId} className='border rounded-md bg-card'>
+                {/* Course header - responsive layout */}
                 <div
-                  className='flex justify-between items-center p-3 cursor-pointer hover:bg-accent/50 rounded-t-md'
+                  className='flex justify-between items-center p-2 sm:p-3 cursor-pointer hover:bg-accent/50 rounded-t-md'
                   onClick={() => toggleCourse(course.courseInfo.courseId.toString())}
                 >
-                  <div>
-                    <div className='flex items-center'>
-                      <span className='font-medium'>{course.courseInfo.courseCode}</span>
+                  <div className='w-full'>
+                    <div className='flex flex-wrap items-center gap-1 sm:gap-2'>
+                      <span className='font-medium text-sm sm:text-base'>
+                        {course.courseInfo.courseCode}
+                      </span>
 
-                      <Badge
-                        hidden={!course.courseInfo.courseType}
-                        variant='outline'
-                        className='ml-2 text-xs'
-                      >
-                        {course.courseInfo.courseType}
-                      </Badge>
+                      {/* Responsive badges with conditional rendering for mobile */}
+                      <div className='flex flex-wrap gap-1'>
+                        {course.courseInfo.courseType && (
+                          <Badge variant='outline' className='text-[10px] sm:text-xs'>
+                            {course.courseInfo.courseType}
+                          </Badge>
+                        )}
 
-                      <Badge
-                        hidden={!course.courseInfo.credits}
-                        variant='outline'
-                        className='ml-2 text-xs'
-                      >
-                        {course.courseInfo.credits}{' '}
-                        {course.courseInfo.credits === 1 ? 'credit' : 'credits'}
-                      </Badge>
+                        {course.courseInfo.credits && (
+                          <Badge variant='outline' className='text-[10px] sm:text-xs'>
+                            {course.courseInfo.credits}{' '}
+                            {course.courseInfo.credits === 1 ? 'credit' : 'credits'}
+                          </Badge>
+                        )}
 
-                      <Badge
-                        hidden={!course.courseInfo.coRequisite}
-                        variant='outline'
-                        className='ml-2 text-xs'
-                      >
-                        Co-Req
-                      </Badge>
+                        {/* Hide these badges on mobile for space */}
+                        {course.courseInfo.coRequisite && (
+                          <Badge
+                            variant='outline'
+                            className='hidden sm:inline-flex text-[10px] sm:text-xs'
+                          >
+                            Co-Req
+                          </Badge>
+                        )}
 
-                      <Badge
-                        hidden={!course.courseInfo.preRequisite}
-                        variant='outline'
-                        className='ml-2 text-xs'
-                      >
-                        Pre-Req
-                      </Badge>
+                        {course.courseInfo.preRequisite && (
+                          <Badge
+                            variant='outline'
+                            className='hidden sm:inline-flex text-[10px] sm:text-xs'
+                          >
+                            Pre-Req
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                    <div className='text-sm text-muted-foreground mt-0.5'>
+                    <div className='text-xs sm:text-sm text-muted-foreground mt-0.5 truncate pr-6'>
                       {course.courseInfo.courseName}
                     </div>
                   </div>
-                  <div className='flex items-center'>
+                  <div className='flex items-center ml-2'>
                     {isExpanded ? (
-                      <ChevronUp className='h-5 w-5 text-muted-foreground' />
+                      <ChevronUp className='h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground' />
                     ) : (
-                      <ChevronDown className='h-5 w-5 text-muted-foreground' />
+                      <ChevronDown className='h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground' />
                     )}
                   </div>
                 </div>
 
+                {/* Course details when expanded */}
                 {isExpanded && (
-                  <div className='p-3 pt-0'>
+                  <div className='p-2 sm:p-3 pt-0'>
                     <CourseItem
                       academic={academic}
                       semester={semester}
@@ -256,10 +335,11 @@ export const CourseList: React.FC<CourseListProps> = ({
             );
           })}
 
+          {/* Loading indicator */}
           {visibleRange.end < filteredCourses.length && (
-            <div ref={loaderRef} className='py-4 text-center'>
-              <Loader2 className='h-6 w-6 animate-spin mx-auto mb-2' />
-              <p className='text-sm text-muted-foreground'>Loading more courses...</p>
+            <div ref={loaderRef} className='py-3 sm:py-4 text-center'>
+              <Loader2 className='h-5 w-5 sm:h-6 sm:w-6 animate-spin mx-auto mb-2' />
+              <p className='text-xs sm:text-sm text-muted-foreground'>Loading more courses...</p>
             </div>
           )}
         </div>

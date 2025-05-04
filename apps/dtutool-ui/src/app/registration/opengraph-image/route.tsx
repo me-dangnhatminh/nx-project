@@ -1,4 +1,4 @@
-import { getDetailFromRegIds } from '@/services/dtutool';
+import { getDetailFromRegIds } from '../../../services/dtutool';
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';

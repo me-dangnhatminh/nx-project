@@ -1,4 +1,4 @@
-import { getCourses } from '@/services/dtutool';
+import { getCourses } from '../../../../services/dtutool';
 import { z } from 'zod';
 
 const GetCoursesParams = z.object({

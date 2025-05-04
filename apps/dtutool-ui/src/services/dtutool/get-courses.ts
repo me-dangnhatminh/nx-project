@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { CourseInfo } from '@/lib/types';
+import { CourseInfo } from '@shared/types/dtutool';
 import { dtuParamsMapper } from './mapper';
 
 const isEmpty = (str: string | undefined | null): boolean => {

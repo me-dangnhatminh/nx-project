@@ -7,10 +7,10 @@ import {
   CourseInfo,
   MakeupSessionInfo,
   RegistrationInfo,
-} from '@/lib/types';
+} from '@shared/types/dtutool';
 import { toDate } from 'date-fns-tz';
 import { endOfDay, parse, startOfDay } from 'date-fns';
-import { getFirstDateOfVNAcademic } from '@/lib/utils';
+import { getFirstDateOfVNAcademic } from '@shared/utils/dtutool';
 import { AnyNode } from 'domhandler';
 import { dtuParamsMapper } from './mapper';
 

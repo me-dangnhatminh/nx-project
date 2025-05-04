@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
-import { Button } from '@/components/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ui/components/tooltip';
+import { Button } from './button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@shadcn-ui/components/tooltip';
 import { Share } from 'lucide-react';
 
 export const CopyLinkButton = () => {

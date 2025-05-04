@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/card';
-import { Button } from '@ui/components/button';
-import { ConflictResult, SelectedClassroom } from '@/lib/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@shadcn-ui/components/card';
+import { Button } from '@shadcn-ui/components/button';
+import { ConflictResult, SelectedClassroom } from '@shared/types/dtutool';
 import MyCourses from './MyCourses';
 
 interface CourseSelectionCardProps {
@@ -28,8 +28,10 @@ export const CourseSelectionCard: React.FC<CourseSelectionCardProps> = ({
   scheduleConflicts,
 }) => {
   return (
-    <Card>
-      <CardHeader>
+    <Card
+    
+    className='p-2 sm:p-4 gap-2 sm:gap-4 '>
+      <CardHeader className='p-0'>
         <div className='flex justify-between items-center'>
           <CardTitle className='text-lg'>Seleted Classrooms</CardTitle>
           <Button
@@ -52,7 +54,13 @@ export const CourseSelectionCard: React.FC<CourseSelectionCardProps> = ({
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent
+        className='p-0'
+        style={{
+          maxHeight: 'calc(100vh - 200px)',
+          overflowY: 'auto',
+        }}
+      >
         <MyCourses
           selectedClassrooms={selectedClassrooms}
           activeClassroomIdxs={activeClassroomIdxs}

@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Button } from '@ui/components/button';
+import { Button } from '@shadcn-ui/components/button';
 import { LogOut } from 'lucide-react';
-import { ConflictResult } from '@/lib/types';
+import { ConflictResult } from '@shared/types/dtutool';
 
 interface PageHeaderProps {
   scheduleConflicts: ConflictResult[];

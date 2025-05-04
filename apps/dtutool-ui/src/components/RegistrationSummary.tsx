@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { ConflictResult, SelectedClassroom } from '@/lib/types';
+import { ConflictResult, SelectedClassroom } from '@shared/types/dtutool';
 import { SummaryItem } from './SummaryItem';
-import { Card, CardContent, CardHeader } from '@ui/components/card';
+import { Card, CardContent, CardHeader } from '@shadcn-ui/components/card';
 import { CheckCircle, AlertCircle, BookOpen, CreditCard } from 'lucide-react';
+import { cn } from '@shared/utils/index';
+import { Badge } from '@shadcn-ui/components/badge';
 
 interface RegistrationSummaryProps {
   selectedClassrooms: SelectedClassroom[];
@@ -46,26 +48,43 @@ export const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({
   const hasConflicts = conflictsCount > 0;
 
   return (
-    <Card>
-      <CardHeader>
-        <span className='text-lg font-semibold text-foreground'>Registration Summary</span>
+    <Card className={cn('p-2 sm:p-4', 'rounded-lg border gap-2')}>
+      <CardHeader className='p-0'>
+        <span className='text-base sm:text-lg font-semibold text-foreground'>
+          Registration Summary
+        </span>
       </CardHeader>
-      <CardContent>
+      <CardContent className='p-0'>
         <SummaryItem
           icon={BookOpen}
-          label='Total Courses'
+          label={
+            <>
+              <span className='hidden sm:inline'>Total Courses</span>
+              <span className='inline sm:hidden'>Courses</span>
+            </>
+          }
           value={`${totalCourses} (${activeTotalCourses} selected)`}
         />
 
         <SummaryItem
           icon={CreditCard}
-          label='Total Credits'
+          label={
+            <>
+              <span className='hidden sm:inline'>Total Credits</span>
+              <span className='inline sm:hidden'>Credits</span>
+            </>
+          }
           value={`${totalCredits} (${activeCredits} selected)`}
         />
 
         <SummaryItem
           icon={hasConflicts ? AlertCircle : CheckCircle}
-          label='Schedule Conflicts'
+          label={
+            <>
+              <span className='hidden sm:inline'>Schedule Conflicts</span>
+              <span className='inline sm:hidden'>Conflicts</span>
+            </>
+          }
           value={hasConflicts ? `${conflictsCount} conflicts` : 'None'}
           valueClassName={hasConflicts ? 'text-destructive font-medium' : 'text-success'}
         />

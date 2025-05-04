@@ -1,6 +1,5 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { getDetailFromRegIds } from '@/services/dtutool';
-import { CourseDetailSchema } from '@/lib/types';
+import { getDetailFromRegIds } from '../../../../services/dtutool';
+import { CourseDetailSchema } from '@shared/types/dtutool';
 import { z } from 'zod';
 
 const AcademicSchema = z.string().regex(/^\d{4}-\d{4}$/);

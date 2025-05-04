@@ -1,4 +1,4 @@
-import { CourseDetail, CourseDetailSchema, CourseInfo, CourseInfoSchema } from '@/lib/types';
+import { CourseDetail, CourseDetailSchema, CourseInfo, CourseInfoSchema } from '@shared/types/dtutool';
 import axios from 'axios';
 import qs from 'qs';
 

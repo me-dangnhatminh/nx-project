@@ -1,4 +1,4 @@
-import { CourseDetail, CourseInfo } from '@/lib/types';
+import { CourseDetail, CourseInfo } from '@shared/types/dtutool';
 
 import { getCourseClass } from './get-course-class';
 import { getAcademicProgramName } from './academic-program';

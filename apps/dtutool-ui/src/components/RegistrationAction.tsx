@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button } from './button';
-import { Separator } from '@ui/components/separator';
+import { Separator } from '@shadcn-ui/components/separator';
 import { AlertCircle, CheckCircle, AlertTriangle } from 'lucide-react';
-import { ConflictResult } from '@/lib/types';
+import { ConflictResult } from '@shared/types/dtutool';
 
 interface RegistrationActionProps {
   scheduleConflicts: ConflictResult[];

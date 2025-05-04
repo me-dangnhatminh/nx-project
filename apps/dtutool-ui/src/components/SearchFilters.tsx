@@ -1,6 +1,6 @@
 import React from 'react';
-import { Input } from '@ui/components/input';
-import { Button } from '@ui/components/button';
+import { Input } from '@shadcn-ui/components/input';
+import { Button } from '@shadcn-ui/components/button';
 import { Search } from 'lucide-react';
 
 interface SearchFiltersProps {

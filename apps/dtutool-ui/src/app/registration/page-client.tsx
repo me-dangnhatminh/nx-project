@@ -2,18 +2,21 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Menu, MenuIcon, XIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
-import dtutoolApi from '@/lib/apis/dtutool-api';
-import { checkScheduleConflicts, cn } from '@/lib/utils';
-import { SelectedClassroom } from '@/lib/types';
+import dtutoolApi from '../../api/dtutool-api';
+import { checkScheduleConflicts } from '@shared/utils/dtutool';
+import { cn } from '@shared/utils';
+import { SelectedClassroom } from '@shared/types/dtutool';
 
-import { RegistrationSummary, CourseSelectionCard } from '@/components';
-import { Tabs, TabsList, TabsTrigger } from '@ui/components/tabs';
-import { Badge } from '@ui/components/badge';
-import { CopyLinkButton } from '@/components/CopyLinkButton';
-import { useURLParamsSetter } from '@/hooks';
+import { Tabs, TabsList, TabsTrigger } from '@shadcn-ui/components/tabs';
+import { Badge } from '@shadcn-ui/components/badge';
+import { Sheet, SheetContent } from '@shadcn-ui/components/sheet';
+import { Button } from '@shadcn-ui/components/button';
+import { RegistrationSummary, CourseSelectionCard } from '../../components';
+import { CopyLinkButton } from '../../components/CopyLinkButton';
+import { useURLParamsSetter } from '../../hooks';
 
 const TabCalendar = dynamic(() => import('./tab-calendar'), { ssr: false });
 const TabSearch = dynamic(() => import('./tab-search'), { ssr: false });
@@ -29,8 +32,8 @@ type CourseRegistrationState = {
 
 export default function PageClient() {
   const searchParams = useSearchParams();
-
   const setURLParams = useURLParamsSetter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [state, setState] = useState<CourseRegistrationState>({
     tab: 'search',
@@ -188,6 +191,69 @@ export default function PageClient() {
     return checkScheduleConflicts(activeClassrooms);
   }, [state.selectedClassrooms, state.activeClassroomIdxs]);
 
+  const handleTabChange = (tab: string) => {
+    if (tab === 'search' || tab === 'calendar') {
+      setState((prev) => ({ ...prev, tab: tab as 'search' | 'calendar' }));
+      // Close sidebar on mobile when changing tabs
+      setSidebarOpen(false);
+    } else console.warn(`Invalid tab value: ${tab}`);
+  };
+
+  const renderSidebarContent = () => (
+    <div className='flex flex-col space-y-6'>
+      <RegistrationSummary
+        activeClassroomIdxs={state.activeClassroomIdxs}
+        selectedClassrooms={state.selectedClassrooms}
+        scheduleConflicts={scheduleConflicts}
+      />
+
+      <CourseSelectionCard
+        tab={state.tab}
+        setTab={handleTabChange}
+        activeClassroomIdxs={state.activeClassroomIdxs}
+        selectedClassrooms={state.selectedClassrooms}
+        scheduleConflicts={scheduleConflicts}
+        onRemoveClassroom={(regId) => {
+          setState((prev) => {
+            // Find the index of the classroom to remove
+            const idx = prev.selectedClassrooms.findIndex((s) => s.registration.regId === regId);
+
+            if (idx === -1) return prev;
+
+            const selectedClassrooms = [...prev.selectedClassrooms];
+            const activeClassroomIdxs = [...prev.activeClassroomIdxs];
+            selectedClassrooms.splice(idx, 1);
+            activeClassroomIdxs.splice(idx, 1);
+            return { ...prev, selectedClassrooms, activeClassroomIdxs };
+          });
+        }}
+        onClassroomActive={(idxs) => {
+          setState((prev) => {
+            const activeClassroomIdxs = [...prev.activeClassroomIdxs];
+            idxs.forEach((idx) => {
+              if (idx >= 0 && idx < activeClassroomIdxs.length) {
+                activeClassroomIdxs[idx] = true;
+              }
+            });
+            return { ...prev, activeClassroomIdxs };
+          });
+        }}
+        onClassroomInactive={(idxs) => {
+          setState((prev) => {
+            const activeClassroomIdxs = [...prev.activeClassroomIdxs];
+            idxs.forEach((idx) => {
+              if (idx >= 0 && idx < activeClassroomIdxs.length) {
+                activeClassroomIdxs[idx] = false;
+              }
+            });
+
+            return { ...prev, activeClassroomIdxs };
+          });
+        }}
+      />
+    </div>
+  );
+
   if (!state.academic || !state.semester) return 'Loading ...';
 
   return (
@@ -198,135 +264,134 @@ export default function PageClient() {
         username='me-dangnhatminh'
       />
 
-      <div className={cn('max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8', 'h-screen min-h-[700px]')}>
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-          <Tabs
-            className='lg:col-span-2'
-            defaultValue='search'
-            value={state.tab}
-            onValueChange={(tab) => {
-              if (tab === 'search' || tab === 'calendar') {
-                setState((prev) => ({ ...prev, tab }));
-              } else console.warn(`Invalid tab value: ${tab}`);
-            }}
-          >
-            <div className='flex items-center justify-between'>
-              <TabsList>
-                <TabsTrigger value='search'>Search</TabsTrigger>
-                <TabsTrigger value='calendar'>
-                  Calendar
-                  <Badge hidden={!scheduleConflicts.length} variant='destructive' className='ml-2'>
-                    <AlertCircle className='h-3 w-3 mr-1' />
-                    Conflicts!
-                  </Badge>
-                </TabsTrigger>
-              </TabsList>
+      <div
+        className={cn(
+          'w-full mx-auto px-2 py-4 sm:px-4 md:px-6 lg:px-8 xl:max-w-7xl',
+          'min-h-[calc(100vh-64px)]',
+        )}
+      >
+        <div className='flex flex-col lg:grid lg:grid-cols-3 lg:gap-6'>
+          {/* Mobile sidebar toggle button */}
+          <div className='lg:hidden flex items-center justify-between mb-4'>
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+              <SheetContent
+                side='right'
+                className={cn('w-[85vw] sm:w-[400px] overflow-y-auto', 'p-4')}
+              >
+                <h3 className='text-lg font-medium'>Course Selection</h3>
+                {renderSidebarContent()}
+              </SheetContent>
+            </Sheet>
+          </div>
 
-              <CopyLinkButton></CopyLinkButton>
-            </div>
-            <div hidden={state.tab !== 'search'}>
-              <TabSearch
-                academic={state.academic}
-                semester={state.semester}
-                selectedClassrooms={state.selectedClassrooms}
-                onSelectedAcademic={(academic) => {
-                  setState((prev) => ({
-                    ...prev,
-                    academic,
-                    activeClassroomIdxs: [],
-                    selectedClassrooms: [],
-                  }));
-                }}
-                onSelectedSemester={(semester) => {
-                  setState((prev) => ({
-                    ...prev,
-                    semester,
-                    activeClassroomIdxs: [],
-                    selectedClassrooms: [],
-                  }));
-                }}
-                onAddClassroom={(course, classroom) => {
-                  setState((prev) => {
-                    const newItem = { ...classroom, course };
-                    const regId = classroom.registration.regId;
-                    const selecteds = prev.selectedClassrooms;
-                    const actives = prev.activeClassroomIdxs;
-                    const exitsIdx = selecteds.findIndex((s) => s.registration.regId === regId);
-                    if (exitsIdx !== -1) return prev;
-                    const selectedClassrooms = [...selecteds, newItem];
-                    const activeClassroomIdxs = [...actives, true];
-                    return {
-                      ...prev,
-                      selectedClassrooms,
-                      activeClassroomIdxs,
-                    };
-                  });
-                }}
-              />
-            </div>
+          <div className='lg:col-span-2'>
+            <Tabs
+              className='w-full'
+              defaultValue='search'
+              value={state.tab}
+              onValueChange={handleTabChange}
+            >
+              <div className={cn('flex items-center justify-between mb-4', 'hidden lg:flex')}>
+                <TabsList className='w-full sm:w-auto'>
+                  <TabsTrigger value='search' className='flex-1 sm:flex-none'>
+                    Search
+                  </TabsTrigger>
+                  <TabsTrigger value='calendar' className='flex-1 sm:flex-none'>
+                    Calendar
+                    {scheduleConflicts.length > 0 && (
+                      <Badge variant='destructive' className='ml-2'>
+                        <AlertCircle className='h-3 w-3 mr-1' />
+                        {scheduleConflicts.length}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
 
-            <div hidden={state.tab !== 'calendar'}>
-              <TabCalendar
-                activeClassroomIdxs={state.activeClassroomIdxs}
-                selectedClassrooms={state.selectedClassrooms}
-                scheduleConflicts={scheduleConflicts}
-              />
-            </div>
-          </Tabs>
+                <div className='hidden sm:block'>
+                  <CopyLinkButton />
+                </div>
+              </div>
 
-          <div className='flex flex-col space-y-6'>
-            <RegistrationSummary
-              activeClassroomIdxs={state.activeClassroomIdxs}
-              selectedClassrooms={state.selectedClassrooms}
-              scheduleConflicts={scheduleConflicts}
-            />
+              {/* Tab Content */}
+              <div className='tab-content'>
+                <div hidden={state.tab !== 'search'} className='mb-6 lg:mb-0'>
+                  <TabSearch
+                    academic={state.academic}
+                    semester={state.semester}
+                    selectedClassrooms={state.selectedClassrooms}
+                    onSelectedAcademic={(academic) => {
+                      setState((prev) => ({
+                        ...prev,
+                        academic,
+                        activeClassroomIdxs: [],
+                        selectedClassrooms: [],
+                      }));
+                    }}
+                    onSelectedSemester={(semester) => {
+                      setState((prev) => ({
+                        ...prev,
+                        semester,
+                        activeClassroomIdxs: [],
+                        selectedClassrooms: [],
+                      }));
+                    }}
+                    onAddClassroom={(course, classroom) => {
+                      setState((prev) => {
+                        const newItem = { ...classroom, course };
+                        const regId = classroom.registration.regId;
+                        const selecteds = prev.selectedClassrooms;
+                        const actives = prev.activeClassroomIdxs;
+                        const exitsIdx = selecteds.findIndex((s) => s.registration.regId === regId);
+                        if (exitsIdx !== -1) return prev;
+                        const selectedClassrooms = [...selecteds, newItem];
+                        const activeClassroomIdxs = [...actives, true];
+                        return {
+                          ...prev,
+                          selectedClassrooms,
+                          activeClassroomIdxs,
+                        };
+                      });
+                    }}
+                  />
+                </div>
 
-            <CourseSelectionCard
-              tab={state.tab}
-              setTab={(tab) => setState((prev) => ({ ...prev, tab }))}
-              activeClassroomIdxs={state.activeClassroomIdxs}
-              selectedClassrooms={state.selectedClassrooms}
-              scheduleConflicts={scheduleConflicts}
-              onRemoveClassroom={(regId) => {
-                setState((prev) => {
-                  // Find the index of the classroom to remove
-                  const idx = prev.selectedClassrooms.findIndex(
-                    (s) => s.registration.regId === regId,
-                  );
+                <div hidden={state.tab !== 'calendar'} className='mb-6 lg:mb-0'>
+                  <TabCalendar
+                    activeClassroomIdxs={state.activeClassroomIdxs}
+                    selectedClassrooms={state.selectedClassrooms}
+                    scheduleConflicts={scheduleConflicts}
+                  />
+                </div>
+              </div>
+            </Tabs>
+          </div>
 
-                  if (idx === -1) return prev;
+          {/* Desktop sidebar - hidden on mobile */}
+          <div className='hidden lg:block'>{renderSidebarContent()}</div>
+        </div>
 
-                  const selectedClassrooms = [...prev.selectedClassrooms];
-                  const activeClassroomIdxs = [...prev.activeClassroomIdxs];
-                  selectedClassrooms.splice(idx, 1);
-                  activeClassroomIdxs.splice(idx, 1);
-                  return { ...prev, selectedClassrooms, activeClassroomIdxs };
-                });
-              }}
-              onClassroomActive={(idxs) => {
-                setState((prev) => {
-                  const activeClassroomIdxs = [...prev.activeClassroomIdxs];
-                  idxs.forEach((idx) => {
-                    if (idx >= 0 && idx < activeClassroomIdxs.length) {
-                      activeClassroomIdxs[idx] = true;
-                    }
-                  });
-                  return { ...prev, activeClassroomIdxs };
-                });
-              }}
-              onClassroomInactive={(idxs) => {
-                setState((prev) => {
-                  const activeClassroomIdxs = [...prev.activeClassroomIdxs];
-                  idxs.forEach((idx) => {
-                    if (idx >= 0 && idx < activeClassroomIdxs.length) {
-                      activeClassroomIdxs[idx] = false;
-                    }
-                  });
+        <div className='sm:hidden fixed bottom-4 left-0 right-0 flex justify-center z-10'>
+          <div className='bg-background rounded-full shadow-lg p-2 flex space-x-2'>
+            <CopyLinkButton />
+            <Button
+              size='sm'
+              variant={state.tab === 'search' ? 'default' : 'ghost'}
+              onClick={() => handleTabChange('search')}
+            >
+              Search
+            </Button>
 
-                  return { ...prev, activeClassroomIdxs };
-                });
-              }}
-            />
+            <Button
+              size='sm'
+              variant={state.tab === 'calendar' ? 'default' : 'ghost'}
+              onClick={() => handleTabChange('calendar')}
+            >
+              Calendar
+            </Button>
+
+            <Button size='sm' className='rounded-full w-8 h-8' onClick={() => setSidebarOpen(true)}>
+              <MenuIcon className='h-4 w-4' />
+            </Button>
           </div>
         </div>
       </div>

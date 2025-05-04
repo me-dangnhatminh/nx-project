@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { ConflictResult, SelectedClassroom } from '@/lib/types';
+import { ConflictResult, SelectedClassroom } from '@shared/types/dtutool';
 import { EmptyCourseList } from './EmptyCourseList';
 import { CourseListItem } from './CourseListItem';
-import { Checkbox } from '@ui/components/checkbox';
-import { Label } from '@ui/components/label';
+import { Checkbox } from '@shadcn-ui/components/checkbox';
+import { Label } from '@shadcn-ui/components/label';
 
 interface MyCoursesProps {
   selectedClassrooms: SelectedClassroom[];
@@ -28,9 +28,9 @@ const MyCourses: React.FC<MyCoursesProps> = ({
   const activeCount = activeClassroomIdxs.filter(Boolean).length;
 
   return (
-    <div>
+    <div className='flex flex-col gap-2'>
       {selectedClassrooms.length > 0 && (
-        <div className='flex items-center justify-between mb-3'>
+        <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2'>
             <Checkbox
               id='select-all-courses'

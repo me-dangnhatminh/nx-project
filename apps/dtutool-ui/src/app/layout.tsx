@@ -1,4 +1,4 @@
-import '@ui/styles/globals.css';
+import '@shadcn-ui/styles/globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {

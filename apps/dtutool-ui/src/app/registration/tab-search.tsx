@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Classroom, CourseDetail, CourseInfo, SelectedClassroom } from '@/lib/types';
+import { Classroom, CourseDetail, CourseInfo, SelectedClassroom } from '@shared/types/dtutool';
 
 import { Calendar, Package, Loader2 } from 'lucide-react';
-import dtutoolApi from '@/lib/apis/dtutool-api';
-import { CourseList, EmptyStateView, AcademicPeriodSelector } from '@/components';
+import dtutoolApi from '../../api/dtutool-api';
+import { CourseList, EmptyStateView, AcademicPeriodSelector } from '../../components';
 
 // gen 4 item from now
 const now = new Date();

@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { SelectedClassroom, ConflictResult, CalendarEvent } from '@/lib/types';
+import { SelectedClassroom, ConflictResult, CalendarEvent } from '@shared/types/dtutool';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { Card, CardContent } from '@ui/components/card';
+import { Card, CardContent } from '@shadcn-ui/components/card';
 import {
   Dialog,
   DialogContent,
@@ -14,12 +14,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@ui/components/dialog';
-import { Button } from '@ui/components/button';
-import { Badge } from '@ui/components/badge';
-import { Clock, MapPin, AlertTriangle } from 'lucide-react';
+} from '@shadcn-ui/components/dialog';
+import { Button } from '@shadcn-ui/components/button';
+import { Badge } from '@shadcn-ui/components/badge';
+import { Clock, MapPin, AlertTriangle, ChevronRight, ChevronLeft, Calendar } from 'lucide-react';
 import { addDays, addWeeks, format, parse } from 'date-fns';
 import { EventImpl } from '@fullcalendar/core/internal';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@shadcn-ui/components/dropdown-menu';
 
 // Helper function to generate colors based on course code
 function generateCourseColor(courseCode: string): string {
@@ -65,8 +71,6 @@ const mapClassroomToEvent = (
 
     const fristMondayAcademic = classroom.schedule.firstDateOfAcademic;
 
-    // weeks when monday is first of week
-
     // Generate events for regular sessions
     regularSessions.forEach(({ dayOfWeek, startTime, endTime, room, location, excludedWeeks }) => {
       const excludedWeeksSet = new Set(excludedWeeks);
@@ -85,7 +89,7 @@ const mapClassroomToEvent = (
 
         events.push({
           id: `${regId}-r-${dayOfWeek}-${startTime}-${week}`,
-          title: `${courseCode} - ${className}`,
+          title: `${className}`,
           start,
           end,
           allDay: false,
@@ -156,6 +160,10 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
   activeClassroomIdxs,
   scheduleConflicts,
 }) => {
+  const [calendarRange, setCalendarRange] = useState<{ start: Date; end: Date } | null>(null);
+  const [currentView, setCurrentView] = useState<'timeGridDay' | 'timeGridWeek' | 'dayGridMonth'>(
+    'timeGridWeek',
+  );
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventImpl | CalendarEvent | null>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
@@ -190,21 +198,17 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
     return allEvents;
   }, [selectedClassrooms, activeClassroomIdxs, scheduleConflicts]);
 
-  const handleGotoFirstDay = useCallback(
-    () => {
-      const calendarApi = calendarRef.current?.getApi();
-      if (!calendarApi) return;
-      let fistDay: Date | null = null;
-      events.forEach((event) => {
-        const eventStart = new Date(event.start.toString());
-        if (!fistDay) fistDay = new Date(eventStart);
-        else if (eventStart < fistDay) fistDay = eventStart;
-      });
-      if (fistDay) calendarApi.gotoDate(fistDay);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [calendarRef.current, events],
-  );
+  const handleGotoFirstDay = useCallback(() => {
+    const calendarApi = calendarRef.current?.getApi();
+    if (!calendarApi) return;
+    let fistDay: Date | null = null;
+    events.forEach((event) => {
+      const eventStart = new Date(event.start.toString());
+      if (!fistDay) fistDay = new Date(eventStart);
+      else if (eventStart < fistDay) fistDay = eventStart;
+    });
+    if (fistDay) calendarApi.gotoDate(fistDay);
+  }, [events]);
 
   const handleGotoLastDay = useCallback(() => {
     const calendarApi = calendarRef.current?.getApi();
@@ -216,91 +220,219 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
       else if (eventEnd > lastDay) lastDay = eventEnd;
     });
     if (lastDay) calendarApi.gotoDate(lastDay);
+  }, [events]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [calendarRef.current, events]);
+  const todayInRange = useMemo(() => {
+    if (!calendarRange) return false;
+    const today = new Date();
+    return today >= calendarRange.start && today <= calendarRange.end;
+  }, [calendarRange]);
+
+  const handleViewChange = (view: 'timeGridDay' | 'timeGridWeek' | 'dayGridMonth') => {
+    const calendarApi = calendarRef.current?.getApi();
+    if (calendarApi) {
+      calendarApi.changeView(view);
+      setCurrentView(view);
+    }
+  };
 
   return (
-    <Card className='w-full h-full'>
-      <CardContent className='space-y-2'>
-        <div className='flex space-x-2'>
-          <Button size='sm' variant='outline' onClick={handleGotoFirstDay}>
+    <Card className='w-full h-full p-0'>
+      <CardContent className='p-2 sm:p-6 flex flex-col gap-2 sm:gap-4'>
+        <div className='flex flex-wrap gap-2'>
+          <Button
+            size='sm'
+            variant='outline'
+            onClick={handleGotoFirstDay}
+            className='text-xs sm:text-sm'
+          >
             Start Semester
           </Button>
-          <Button size='sm' variant='outline' onClick={handleGotoLastDay}>
+          <Button
+            size='sm'
+            variant='outline'
+            onClick={handleGotoLastDay}
+            className='text-xs sm:text-sm'
+          >
             End Semester
           </Button>
+          <Button
+            disabled={todayInRange}
+            size='sm'
+            onClick={() => {
+              const calendarApi = calendarRef.current?.getApi();
+              if (calendarApi) calendarApi.today();
+            }}
+            className='text-xs sm:text-sm'
+          >
+            Today
+          </Button>
         </div>
-        <FullCalendar
-          ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView='timeGridWeek'
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay',
-          }}
-          events={events}
-          eventClick={(info) => {
-            if (!!selectedEvent) return;
-            setSelectedEvent(info.event);
-            setIsEventDialogOpen(true);
-          }}
-          slotMinTime='08:00:00'
-          slotMaxTime='21:00:00'
-          allDaySlot={false}
-          firstDay={1}
-          height='auto'
-          aspectRatio={1.5}
-          eventTimeFormat={{
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-          }}
-          eventDidMount={(info) => {
-            if (info.event.extendedProps.conflicted) {
-              info.el.style.cursor = 'pointer';
-              info.el.classList.add('conflict-event');
 
-              // Add a small indicator for conflicts
-              const dotElement = document.createElement('span');
-              dotElement.className = 'conflict-indicator';
-              dotElement.innerHTML = ' ⚠️';
-              const titleEl = info.el.querySelector('.fc-event-title');
-              if (titleEl) {
-                titleEl.appendChild(dotElement);
+        {/* Calendar navigation and title - responsive layout */}
+        <div className='flex flex-wrap items-center justify-between mb-3 gap-2'>
+          <div className='flex space-x-0.5'>
+            <Button
+              variant='default'
+              size='sm'
+              className='rounded-r-none h-8 px-2'
+              onClick={() => {
+                const calendarApi = calendarRef.current?.getApi();
+                if (calendarApi) calendarApi.prev();
+              }}
+            >
+              <ChevronLeft className='h-4 w-4' />
+            </Button>
+
+            <Button
+              size='sm'
+              className='rounded-l-none h-8 px-2'
+              onClick={() => {
+                const calendarApi = calendarRef.current?.getApi();
+                if (calendarApi) calendarApi.next();
+              }}
+            >
+              <ChevronRight className='h-4 w-4' />
+            </Button>
+          </div>
+
+          <div className='text-center flex-grow'>
+            <span className='text-sm sm:text-lg font-semibold truncate'>
+              {calendarRef.current?.getApi().view.title || 'Calendar'}
+            </span>
+          </div>
+
+          <div className='block sm:hidden'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='outline' size='sm' className='text-xs'>
+                  <Calendar className='h-4 w-4 mr-1' />
+                  View
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handleViewChange('timeGridDay')}>
+                  Day
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleViewChange('timeGridWeek')}>
+                  Week
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleViewChange('dayGridMonth')}>
+                  Month
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className='hidden sm:flex space-x-0.5'>
+            {[
+              { label: 'Day', value: 'timeGridDay' } as const,
+              { label: 'Week', value: 'timeGridWeek' } as const,
+              { label: 'Month', value: 'dayGridMonth' } as const,
+            ].map((view) => (
+              <Button
+                key={view.value}
+                disabled={currentView === view.value}
+                size='sm'
+                onClick={() => handleViewChange(view.value)}
+              >
+                {view.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Calendar wrapper with responsive styles */}
+        <div className='fc-responsive-wrapper'>
+          <style jsx global>{`
+            /* Responsive styles for calendar */
+            @media (max-width: 640px) {
+              .fc .fc-toolbar.fc-header-toolbar {
+                display: none;
+              }
+              .fc .fc-event .fc-event-title {
+                font-size: 0.7rem;
+                white-space: normal;
+              }
+              .fc .fc-col-header-cell-cushion,
+              .fc .fc-daygrid-day-number {
+                font-size: 0.75rem;
+              }
+              .fc .fc-timegrid-slot-label {
+                font-size: 0.7rem;
+              }
+              .fc .fc-timegrid-axis-cushion {
+                max-width: 30px;
+                font-size: 0.7rem;
               }
             }
-          }}
-        />
+          `}</style>
+
+          <FullCalendar
+            ref={calendarRef}
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView='timeGridWeek'
+            headerToolbar={{ left: undefined, center: undefined, right: undefined }}
+            events={events}
+            datesSet={(dateInfo) => {
+              setCalendarRange({ start: dateInfo.start, end: dateInfo.end });
+              setCurrentView(calendarRef.current?.getApi().view.type as any);
+            }}
+            eventClick={(info) => {
+              setSelectedEvent(info.event);
+              setIsEventDialogOpen(true);
+            }}
+            slotMinTime='06:00'
+            slotMaxTime='22:00'
+            allDaySlot={false}
+            firstDay={1}
+            dayCellClassNames='text-sm'
+            height='auto'
+            contentHeight='auto'
+            /* Add these properties for better mobile support */
+            stickyHeaderDates={true}
+            nowIndicator={true}
+            eventTimeFormat={{
+              hour: 'numeric',
+              minute: '2-digit',
+              meridiem: 'short',
+            }}
+          />
+        </div>
 
         {/* Event Details Dialog */}
         <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
-          <DialogContent className='sm:max-w-md'>
+          <DialogContent className='sm:max-w-md max-w-[95vw] rounded-lg p-4 sm:p-6'>
             <DialogHeader>
-              <DialogTitle>
-                {selectedEvent?.extendedProps?.courseCode} -{' '}
-                {selectedEvent?.extendedProps?.className}
+              <DialogTitle className='flex flex-wrap items-center gap-2'>
+                <span className='break-words'>
+                  {selectedEvent?.extendedProps?.courseCode} -{' '}
+                  {selectedEvent?.extendedProps?.className}
+                </span>
                 {selectedEvent?.extendedProps?.isMakeup && (
-                  <Badge variant='destructive' className='ml-2'>
+                  <Badge variant='destructive' className='mt-1'>
                     Makeup Session
                   </Badge>
                 )}
               </DialogTitle>
-              <DialogDescription>{selectedEvent?.extendedProps?.courseName}</DialogDescription>
+              <DialogDescription className='mt-1 break-words'>
+                {selectedEvent?.extendedProps?.courseName}
+              </DialogDescription>
             </DialogHeader>
 
             <div className='grid gap-3 py-4'>
               {selectedEvent?.extendedProps?.teacherName && (
-                <div className='flex items-start'>
-                  <span className='text-muted-foreground min-w-[100px]'>Instructor:</span>
-                  <span>{selectedEvent.extendedProps.teacherName}</span>
+                <div className='flex flex-col sm:flex-row sm:items-start'>
+                  <span className='text-muted-foreground sm:min-w-[100px] font-medium'>
+                    Instructor:
+                  </span>
+                  <span className='mt-1 sm:mt-0'>{selectedEvent.extendedProps.teacherName}</span>
                 </div>
               )}
 
-              <div className='flex items-center'>
-                <Clock className='w-4 h-4 mr-2 text-muted-foreground' />
-                <span>
+              <div className='flex items-center mt-1'>
+                <Clock className='w-4 h-4 mr-2 text-muted-foreground flex-shrink-0' />
+                <span className='break-words'>
                   {selectedEvent &&
                     `${`${format(selectedEvent?.start || '', 'h:mm a')} - ${format(
                       selectedEvent?.end || '',
@@ -310,9 +442,9 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
               </div>
 
               {selectedEvent?.extendedProps?.room && (
-                <div className='flex items-center'>
-                  <MapPin className='w-4 h-4 mr-2 text-muted-foreground' />
-                  <span>
+                <div className='flex items-start'>
+                  <MapPin className='w-4 h-4 mr-2 text-muted-foreground mt-1 flex-shrink-0' />
+                  <span className='break-words'>
                     Room {selectedEvent.extendedProps.room}
                     {selectedEvent.extendedProps.location &&
                       ` (${selectedEvent.extendedProps.location})`}
@@ -322,7 +454,7 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
 
               {selectedEvent?.extendedProps?.conflicted && (
                 <div className='mt-2 p-2 bg-destructive/10 rounded flex items-center'>
-                  <AlertTriangle className='w-4 h-4 mr-2 text-destructive' />
+                  <AlertTriangle className='w-4 h-4 mr-2 text-destructive flex-shrink-0' />
                   <span className='text-destructive text-sm'>
                     This session conflicts with another course
                   </span>

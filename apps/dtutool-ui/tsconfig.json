@@ -19,12 +19,7 @@
       {
         "name": "next"
       }
-    ],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"],
-      "@ui/*": ["../../libs/ui/src/*"]
-    }
+    ]
   },
   "include": [
     "**/*.js",

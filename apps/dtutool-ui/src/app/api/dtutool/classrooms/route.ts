@@ -1,4 +1,4 @@
-import { getCourseClass } from '@/services/dtutool/get-course-class';
+import { getCourseClass } from '../../../../services/dtutool/get-course-class';
 import { z } from 'zod';
 
 const AcademicSchema = z.string().regex(/^\d{4}-\d{4}$/);

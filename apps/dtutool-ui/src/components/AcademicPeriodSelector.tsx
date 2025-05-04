@@ -8,11 +8,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@ui/components/select';
-import { Card, CardContent } from '@ui/components/card';
-import { Label } from '@ui/components/label';
+} from '@shadcn-ui/components/select';
+import { Card, CardContent } from '@shadcn-ui/components/card';
+import { Label } from '@shadcn-ui/components/label';
 
 import { Alert, AlertDescription } from './alert';
+import { cn } from '@shared/utils/index';
 
 type AcademicYear = { id: string; label: string };
 type Semester = { id: string; label: string };
@@ -39,14 +40,9 @@ export const AcademicPeriodSelector: React.FC<AcademicPeriodSelectorProps> = ({
   }, [academic, semester]);
 
   return (
-    <Card>
-      {/* <CardHeader>
-        <CardTitle className="text-sm font-medium text-primary">
-          Academic Period Selection
-        </CardTitle>
-      </CardHeader> */}
-      <CardContent className='flex flex-col space-y-4'>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+    <Card className={cn('p-2 sm:p-4', 'rounded-lg border border-gray-200 shadow-sm')}>
+      <CardContent className='flex flex-col gap-2 sm:gap-4 p-0'>
+        <div className={cn('grid grid-cols-2  gap-2 sm:gap-4')}>
           <div className='flex flex-col gap-1'>
             <Label htmlFor='academic'>Academic Year</Label>
             <Select
@@ -99,7 +95,7 @@ export const AcademicPeriodSelector: React.FC<AcademicPeriodSelectorProps> = ({
           </Alert>
         ) : (
           <div className='text-sm'>
-            <span className='font-medium'>Current selection:</span> {academic},{' '}
+            <span className='font-medium'>Selected:</span> {academic},{' '}
             {semesters.find((s) => s.id === semester)?.label}
           </div>
         )}

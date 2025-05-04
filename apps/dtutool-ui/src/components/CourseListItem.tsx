@@ -1,10 +1,17 @@
 import React from 'react';
-import { SelectedClassroom } from '@/lib/types';
-import { X } from 'lucide-react';
-import { Checkbox } from '@ui/components/checkbox';
-import { Button } from '@ui/components/button';
-import { Badge } from '@ui/components/badge';
-import { Card } from '@ui/components/card';
+import { SelectedClassroom } from '@shared/types/dtutool';
+import { X, AlertCircle } from 'lucide-react';
+import { Checkbox } from '@shadcn-ui/components/checkbox';
+import { Button } from '@shadcn-ui/components/button';
+import { Badge } from '@shadcn-ui/components/badge';
+import { Card } from '@shadcn-ui/components/card';
+import { cn } from '@shared/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@shadcn-ui/components/tooltip';
 
 interface CourseListItemProps {
   seletedClassroom: SelectedClassroom;
@@ -24,50 +31,84 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
   const classroom = seletedClassroom;
   const course = classroom.course;
   const regId = classroom.registration.regId;
+
   return (
     <Card
-      className={`p-2 border ${
+      className={cn(
+        'p-1.5 sm:p-2 transition-colors',
+        'sm:rounded-lg',
         isConflicted && isActive
           ? 'border-destructive/50 bg-destructive/10'
           : isActive
           ? 'border-primary/30 bg-primary/5'
-          : 'border-border'
-      }`}
+          : 'border-border',
+      )}
     >
-      <div className='flex justify-between items-start'>
-        <div className='flex items-start gap-2'>
+      <div className='flex justify-between items-start gap-1'>
+        <div className='flex items-start gap-1.5 sm:gap-2 flex-1 min-w-0'>
           <Checkbox
             id={`course-${regId}`}
             checked={isActive}
             onCheckedChange={(checked) => {
               if (onActiveChange) onActiveChange(Boolean(checked));
             }}
-            className='mt-1'
+            className='mt-0.5 sm:mt-1 h-3.5 w-3.5 sm:h-4 sm:w-4'
           />
-          <div>
-            <label htmlFor={`course-${regId}`} className='font-medium text-sm cursor-pointer'>
-              {course.courseCode} - {classroom.className}
+          <div className='flex-1 min-w-0'>
+            <div className='flex items-center flex-wrap gap-x-1 gap-y-0.5'>
+              <label
+                htmlFor={`course-${regId}`}
+                className='font-medium text-xs sm:text-sm cursor-pointer truncate'
+                title={`${course.courseCode} - ${classroom.className}`}
+              >
+                {course.courseCode} - {classroom.className}
+              </label>
+
               {isConflicted && isActive && (
-                <Badge variant='destructive' className='ml-2 text-xs'>
-                  Conflict
-                </Badge>
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        variant='destructive'
+                        className='ml-0.5 text-[10px] sm:text-xs h-4 sm:h-5 px-1 py-0'
+                      >
+                        <AlertCircle className='h-2 w-2 mr-0.5' />
+                        Conflict
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className='text-xs'>This course conflicts with another selected course</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
-            </label>
-            <div className='text-xs text-muted-foreground'>{course.credits} credits</div>
-            {classroom.teacher && (
-              <div className='text-xs text-muted-foreground'>{classroom.teacher.name}</div>
-            )}
+            </div>
+
+            <div className='text-[10px] sm:text-xs text-muted-foreground truncate'>
+              {course.credits} {course.credits === 1 ? 'credit' : 'credits'}
+              {classroom.teacher?.name && ` • ${classroom.teacher.name}`}
+            </div>
           </div>
         </div>
-        <Button
-          variant='ghost'
-          size='icon'
-          className='h-6 w-6 text-muted-foreground hover:text-destructive'
-          onClick={() => onRemoveClassroom && onRemoveClassroom(regId)}
-        >
-          <X className='h-4 w-4' />
-          <span className='sr-only'>Remove course</span>
-        </Button>
+
+        <TooltipProvider delayDuration={300}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground hover:text-destructive flex-shrink-0'
+                onClick={() => onRemoveClassroom && onRemoveClassroom(regId)}
+              >
+                <X className='h-3 w-3 sm:h-4 sm:w-4' />
+                <span className='sr-only'>Remove course</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side='left'>
+              <p className='text-xs'>Remove from selection</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </Card>
   );
