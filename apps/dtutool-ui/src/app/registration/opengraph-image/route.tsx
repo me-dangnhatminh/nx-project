@@ -1,4 +1,5 @@
-import { getDetailFromRegIds } from '../../../services/dtutool';
+// apps/dtutool-ui/src/app/registration/opengraph-image/route.tsx
+import { getDetailFromRegIds } from '@dtutool/services/registration';
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';

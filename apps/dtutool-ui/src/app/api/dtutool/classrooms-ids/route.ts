@@ -1,4 +1,4 @@
-import { getDetailFromRegIds } from '../../../../services/dtutool';
+import { getDetailFromRegIds } from '@dtutool/services/registration';
 import { CourseDetailSchema } from '@shared/types/dtutool';
 import { z } from 'zod';
 

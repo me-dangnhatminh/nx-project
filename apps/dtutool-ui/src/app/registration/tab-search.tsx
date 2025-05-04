@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Classroom, CourseDetail, CourseInfo, SelectedClassroom } from '@shared/types/dtutool';
-
 import { Calendar, Package, Loader2 } from 'lucide-react';
-import dtutoolApi from '../../api/dtutool-api';
-import { CourseList, EmptyStateView, AcademicPeriodSelector } from '../../components';
+import { Classroom, CourseDetail, CourseInfo, SelectedClassroom } from '@shared/types/dtutool';
+import { dtutoolApi } from '@dtutool/apis';
+import { cn } from '@shared/utils';
+import { CourseList, EmptyStateView, AcademicSelector } from '../../components/registration';
 
 // gen 4 item from now
 const now = new Date();
@@ -72,8 +72,8 @@ const TabSearch: React.FC<TabSearchProps> = ({
   );
 
   return (
-    <div className='flex flex-col gap-4'>
-      <AcademicPeriodSelector
+    <div className={cn('w-full h-full max-h-full overflow-hidden', 'flex flex-col gap-4')}>
+      <AcademicSelector
         academics={academics}
         semesters={semesters}
         academic={academic}
@@ -82,43 +82,55 @@ const TabSearch: React.FC<TabSearchProps> = ({
         onSelectedSemester={onSelectedSemester}
       />
 
-      {!academic || !semester ? (
+      <div
+        className={cn(
+          'flex 1',
+          'w-full h-full max-h-full overflow-hidden',
+          'flex justify-center items-start',
+        )}
+      >
+        {fetching && (
+          <div className='flex flex-col items-center justify-center py-12'>
+            <Loader2 className='h-4 w-4 animate-spin mb-4' />
+            <p className='text-lg font-medium'>Loading courses...</p>
+            <p className='text-muted-foreground'>This might take a moment</p>
+          </div>
+        )}
+
         <EmptyStateView
+          hidden={!(!academic || !semester)}
           icon={Calendar}
           title='Select Academic Year and Semester'
           description='You must select both academic year and semester to view available courses'
         />
-      ) : fetching ? (
-        <div className='flex flex-col items-center justify-center py-12'>
-          <Loader2 className='h-8 w-8 animate-spin mb-4' />
-          <p className='text-lg font-medium'>Loading courses...</p>
-          <p className='text-muted-foreground'>This might take a moment</p>
-        </div>
-      ) : courses.length === 0 ? (
+
         <EmptyStateView
+          hidden={!(!fetching && courses.length === 0)}
           icon={Package}
           title='No courses found'
           description='No courses found for the selected academic year and semester'
         />
-      ) : (
-        <CourseList
-          courses={courses}
-          academic={academic}
-          semester={semester}
-          search={searchTerm}
-          handleFetchCourse={(course: CourseDetail) => {
-            const courseId = course.courseInfo.courseId;
-            return dtutoolApi
-              .getClassrooms({ courseId, academic, semester })
-              .then((data) => onFetchCourse(data));
-          }}
-          selectedClassrooms={selectedClassrooms}
-          onAddClassroom={onAddClassroom}
-          handleClearSearch={() => {
-            setSearchTerm('');
-          }}
-        />
-      )}
+
+        {!fetching && academic && semester && courses.length > 0 && (
+          <CourseList
+            courses={courses}
+            academic={academic}
+            semester={semester}
+            search={searchTerm}
+            handleFetchCourse={(course: CourseDetail) => {
+              const courseId = course.courseInfo.courseId;
+              return dtutoolApi
+                .getClassrooms({ courseId, academic, semester })
+                .then((data) => onFetchCourse(data));
+            }}
+            selectedClassrooms={selectedClassrooms}
+            onAddClassroom={onAddClassroom}
+            handleClearSearch={() => {
+              setSearchTerm('');
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };

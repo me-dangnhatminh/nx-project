@@ -1,0 +1,20 @@
+@media (max-width: 640px) {
+  .fc .fc-toolbar.fc-header-toolbar {
+    display: none;
+  }
+  .fc .fc-event .fc-event-title {
+    font-size: 0.7rem;
+    white-space: normal;
+  }
+  .fc .fc-col-header-cell-cushion,
+  .fc .fc-daygrid-day-number {
+    font-size: 0.75rem;
+  }
+  .fc .fc-timegrid-slot-label {
+    font-size: 0.7rem;
+  }
+  .fc .fc-timegrid-axis-cushion {
+    max-width: 30px;
+    font-size: 0.7rem;
+  }
+}

@@ -1,3 +1,5 @@
+'use server';
+
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { headers } from 'next/headers';
@@ -40,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function Page() {
+export default async function Page() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <PageClient />
