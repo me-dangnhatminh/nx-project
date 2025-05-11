@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { Classroom, CourseDetail, CourseInfo, SelectedClassroom } from '@shared/types/dtutool';
 import { Button } from '@shadcn-ui/components/button';
 import { CourseItem } from './course-item';
@@ -14,6 +14,9 @@ import {
   DropdownMenuTrigger,
 } from '@shadcn-ui/components/dropdown-menu';
 import { cn } from '@shared/utils';
+import debounce from 'lodash/debounce';
+import { isValidRegId } from '@dtutool/services/registration/get-detail-from-regids';
+import { dtutoolApi } from '@dtutool/apis';
 
 interface CourseListProps {
   academic: string;
@@ -36,38 +39,110 @@ export const CourseList: React.FC<CourseListProps> = ({
   handleClearSearch,
   handleFetchCourse,
 }) => {
+  const [localSearch, setLocalSearch] = useState(() => search || '');
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  const [localSearch, setLocalSearch] = useState(search || '');
-  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
   const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
+  const debouncedFilterRef = useRef<ReturnType<typeof debounce>>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter courses based on search
-  const filteredCourses = localSearch
-    ? courses.filter((course) => {
-        const searchLower = localSearch.toLowerCase();
-        return (
-          course.courseInfo.courseCode.toLowerCase().includes(searchLower) ||
-          course.courseInfo.courseName.toLowerCase().includes(searchLower) ||
-          (course.courseInfo.description &&
-            course.courseInfo.description.toLowerCase().includes(searchLower))
-        );
-      })
-    : courses;
+  const [filterState, setFilterState] = useState<{
+    items: CourseDetail[];
+    isSearching: boolean;
+  }>({ items: courses, isSearching: false });
 
-  // Get visible courses based on current range
-  const visibleCourses = filteredCourses.slice(0, visibleRange.end);
-  const hasMoreCoursesToLoad = visibleRange.end < filteredCourses.length;
+  // Effect to sync search prop with local state - only on mount or when search prop changes
+  useEffect(() => {
+    if (search !== undefined) {
+      setLocalSearch(search);
+    }
+  }, [search]); // Removed localSearch dependency to prevent loops
+
+  // Effect to sync courses prop with filter state when no search is active
+  useEffect(() => {
+    const trimmedSearch = localSearch.trim();
+    if (!trimmedSearch) setFilterState((prev) => ({ ...prev, items: courses }));
+  }, [courses, localSearch]);
+
+  // Setup debounced filter function
+  useEffect(() => {
+    const handleFilterChange = (searchTerm: string) => {
+      const trimmed = searchTerm.trim();
+      if (!trimmed) {
+        setFilterState((prev) => ({ ...prev, items: courses, isSearching: false }));
+        return;
+      }
+
+      const cleanSearch = trimmed.toLowerCase();
+      const isRegCode = isValidRegId(trimmed.toUpperCase());
+
+      if (isRegCode) {
+        setFilterState((prev) => ({ ...prev, isSearching: true }));
+        dtutoolApi
+          .getClassroomsByRegIds({ academic, semester, regIds: [cleanSearch] })
+          .then((data) => {
+            const validCourses = data.filter((v) => v !== null);
+            setFilterState((prev) => ({ ...prev, items: validCourses, isSearching: false }));
+          })
+          .catch((error) => {
+            console.error('Error fetching courses:', error);
+            setFilterState((prev) => ({ ...prev, items: [], isSearching: false }));
+          });
+        return;
+      }
+
+      // Regular search by course attributes
+      const filteredCourses = courses.filter(
+        ({ courseInfo: { courseCode, courseName, description } }) => {
+          return (
+            courseCode.toLowerCase().includes(cleanSearch) ||
+            courseName.toLowerCase().includes(cleanSearch) ||
+            (description && description.toLowerCase().includes(cleanSearch))
+          );
+        },
+      );
+      setFilterState((prev) => ({ ...prev, items: filteredCourses, isSearching: false }));
+    };
+
+    debouncedFilterRef.current = debounce(handleFilterChange, 300);
+
+    return () => {
+      debouncedFilterRef.current?.cancel();
+    };
+  }, [academic, courses, semester]);
+
+  // Fixed: Separate handler for search input changes to prevent blocking typing
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setLocalSearch(newValue); // Update immediately for responsive UI
+  }, []);
+
+  // Trigger search when localSearch changes - with appropriate debounce
+  useEffect(() => {
+    if (debouncedFilterRef.current) {
+      debouncedFilterRef.current(localSearch);
+    }
+  }, [localSearch]);
+
+  // Calculate visible courses and whether there are more to load
+  const { visibleCourses, hasMoreCoursesToLoad } = useMemo(() => {
+    const visibleCourses = filterState.items.slice(0, visibleRange.end);
+    const hasMoreCoursesToLoad = visibleRange.end < filterState.items.length;
+    return { visibleCourses, hasMoreCoursesToLoad };
+  }, [filterState.items, visibleRange.end]);
 
   // Reset visible range when filtered courses change
   useEffect(() => {
-    setVisibleRange({ start: 0, end: Math.min(20, filteredCourses.length) });
-  }, [filteredCourses.length]);
+    if (filterState.isSearching) return;
+    setVisibleRange({ start: 0, end: Math.min(20, filterState.items.length) });
+  }, [filterState.items, filterState.isSearching]);
 
-  // Load more function with debounce to prevent multiple calls
+  // Load more courses handler
   const loadMoreCourses = useCallback(() => {
     if (isLoadingMore || !hasMoreCoursesToLoad) return;
 
@@ -76,14 +151,14 @@ export const CourseList: React.FC<CourseListProps> = ({
     setTimeout(() => {
       setVisibleRange((prev) => ({
         start: prev.start,
-        end: Math.min(prev.end + 10, filteredCourses.length),
+        end: Math.min(prev.end + 10, filterState.items.length),
       }));
       setIsLoadingMore(false);
     }, 300);
-  }, [filteredCourses.length, hasMoreCoursesToLoad, isLoadingMore]);
+  }, [filterState.items.length, hasMoreCoursesToLoad, isLoadingMore]);
 
   // Toggle course expansion
-  const toggleCourse = (courseId: string) => {
+  const toggleCourse = useCallback((courseId: string) => {
     setExpandedItems((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(courseId)) {
@@ -93,9 +168,17 @@ export const CourseList: React.FC<CourseListProps> = ({
       }
       return newSet;
     });
-  };
+  }, []);
 
-  // Set up IntersectionObserver for the loader element
+  // Handle local search clearing
+  const clearLocalSearch = useCallback(() => {
+    setLocalSearch('');
+    if (handleClearSearch) {
+      handleClearSearch();
+    }
+  }, [handleClearSearch]);
+
+  // Set up IntersectionObserver for infinite scrolling
   useEffect(() => {
     if (!loaderRef.current) return;
 
@@ -168,7 +251,15 @@ export const CourseList: React.FC<CourseListProps> = ({
       >
         <div className='flex items-center'>
           <h3 className='text-sm font-medium text-muted-foreground'>
-            {filteredCourses.length} {filteredCourses.length === 1 ? 'course' : 'courses'} found
+            {filterState.isSearching ? (
+              <span className='flex items-center'>
+                Searching... <Loader2 className='ml-2 h-3 w-3 inline animate-spin' />
+              </span>
+            ) : (
+              `${filterState.items.length} ${
+                filterState.items.length === 1 ? 'course' : 'courses'
+              } found`
+            )}
           </h3>
           {search && search !== localSearch && (
             <Badge variant='secondary' className='ml-2 px-2 py-0.5 text-xs'>
@@ -187,35 +278,24 @@ export const CourseList: React.FC<CourseListProps> = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className='w-[200px]'>
-              <div className='p-2'>
-                <Input
-                  className='mb-2'
-                  placeholder='Filter results...'
-                  value={localSearch}
-                  onChange={(e) => setLocalSearch(e.target.value)}
-                />
-                <Button
-                  size='sm'
-                  variant='outline'
-                  className='w-full'
-                  onClick={() => {
-                    handleClearSearch?.();
-                    setIsFilterOpen(false);
-                  }}
-                >
-                  Clear
-                </Button>
-              </div>
+              <Input
+                className='mb-2'
+                name='search-mobile-dropdown'
+                value={localSearch}
+                placeholder='Filter results...'
+                onChange={handleSearchChange}
+              />
             </DropdownMenuContent>
           </DropdownMenu>
 
           {/* Desktop search input */}
           <div className='relative flex-1 sm:flex-initial hidden sm:block'>
             <Input
+              ref={searchInputRef}
+              value={localSearch}
               className='w-full sm:w-[200px] pl-8'
               placeholder='Filter results...'
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
+              onChange={handleSearchChange}
             />
             <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
             {localSearch && (
@@ -223,7 +303,8 @@ export const CourseList: React.FC<CourseListProps> = ({
                 variant='ghost'
                 size='icon'
                 className='absolute right-1 top-1 h-7 w-7'
-                onClick={() => setLocalSearch('')}
+                onClick={clearLocalSearch}
+                type='button'
               >
                 <X className='h-4 w-4' />
               </Button>
@@ -236,33 +317,28 @@ export const CourseList: React.FC<CourseListProps> = ({
               className='w-full pl-8'
               placeholder='Filter results...'
               value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
+              onChange={handleSearchChange}
+              name='search-mobile'
             />
             <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
-            {localSearch && (
-              <Button
-                variant='ghost'
-                size='icon'
-                className='absolute right-1 top-1 h-7 w-7'
-                onClick={() => setLocalSearch('')}
-              >
-                <X className='h-4 w-4' />
-              </Button>
-            )}
+            <Button
+              hidden={!localSearch || localSearch.length === 0}
+              variant='ghost'
+              size='icon'
+              className='absolute right-1 top-1 h-7 w-7'
+              onClick={clearLocalSearch}
+              type='button'
+            >
+              <X className='h-4 w-4' />
+            </Button>
           </div>
-
-          <Button
-            size='sm'
-            variant='outline'
-            onClick={handleClearSearch}
-            className='hidden sm:inline-flex'
-          >
-            Clear
-          </Button>
         </div>
       </div>
 
-      <div hidden={filteredCourses.length !== 0} className='text-center'>
+      <div
+        hidden={filterState.items.length !== 0 || filterState.isSearching}
+        className='text-center'
+      >
         <h3 className='font-medium text-base sm:text-lg'>No courses found</h3>
         <p className='text-sm sm:text-base text-muted-foreground mt-1'>
           Try adjusting your search criteria
@@ -270,101 +346,110 @@ export const CourseList: React.FC<CourseListProps> = ({
       </div>
 
       <div
-        hidden={filteredCourses.length === 0}
+        hidden={filterState.items.length === 0 && !filterState.isSearching}
         className={cn('flex-1', 'w-full h-full overflow-hidden')}
-        //
       >
         <div className='w-full h-full max-h-full overflow-hidden'>
           <div
             ref={scrollContainerRef}
             className='w-full h-full'
-            hidden={filteredCourses.length === 0}
+            hidden={filterState.items.length === 0 && !filterState.isSearching}
           >
             <ScrollArea className={cn('max-h-full', 'w-full h-full overflow-auto')} type='auto'>
               <div className='pr-3 flex flex-col space-y-2'>
-                {visibleCourses.map((course) => {
-                  const isExpanded = expandedItems.has(course.courseInfo.courseId.toString());
-                  return (
-                    <div key={course.courseInfo.courseId} className='border rounded-md bg-card'>
-                      {/* Course header - responsive layout */}
-                      <div
-                        className='flex justify-between items-center p-2 sm:p-3 cursor-pointer hover:bg-accent/50 rounded-t-md'
-                        onClick={() => toggleCourse(course.courseInfo.courseId.toString())}
-                      >
-                        <div className='w-full'>
-                          <div className='flex flex-wrap items-center gap-1 sm:gap-2'>
-                            <span className='font-medium text-sm sm:text-base'>
-                              {course.courseInfo.courseCode}
-                            </span>
+                {/* Show loading placeholder when searching */}
+                {filterState.isSearching && (
+                  <div className='py-8 text-center'>
+                    <Loader2 className='h-8 w-8 animate-spin mx-auto mb-4' />
+                    <p className='text-sm text-muted-foreground'>Searching for courses...</p>
+                  </div>
+                )}
 
-                            {/* Responsive badges with conditional rendering for mobile */}
-                            <div className='flex flex-wrap gap-1'>
-                              {course.courseInfo.courseType && (
-                                <Badge variant='outline' className='text-[10px] sm:text-xs'>
-                                  {course.courseInfo.courseType}
-                                </Badge>
-                              )}
+                {/* Course list */}
+                {!filterState.isSearching &&
+                  visibleCourses.map((course) => {
+                    const isExpanded = expandedItems.has(course.courseInfo.courseId.toString());
+                    return (
+                      <div key={course.courseInfo.courseId} className='border rounded-md bg-card'>
+                        {/* Course header - responsive layout */}
+                        <div
+                          className='flex justify-between items-center p-2 sm:p-3 cursor-pointer hover:bg-accent/50 rounded-t-md'
+                          onClick={() => toggleCourse(course.courseInfo.courseId.toString())}
+                        >
+                          <div className='w-full'>
+                            <div className='flex flex-wrap items-center gap-1 sm:gap-2'>
+                              <span className='font-medium text-sm sm:text-base'>
+                                {course.courseInfo.courseCode}
+                              </span>
 
-                              {course.courseInfo.credits && (
-                                <Badge variant='outline' className='text-[10px] sm:text-xs'>
-                                  {course.courseInfo.credits}{' '}
-                                  {course.courseInfo.credits === 1 ? 'credit' : 'credits'}
-                                </Badge>
-                              )}
+                              {/* Responsive badges with conditional rendering for mobile */}
+                              <div className='flex flex-wrap gap-1'>
+                                {course.courseInfo.courseType && (
+                                  <Badge variant='outline' className='text-[10px] sm:text-xs'>
+                                    {course.courseInfo.courseType}
+                                  </Badge>
+                                )}
 
-                              {/* Hide these badges on mobile for space */}
-                              {course.courseInfo.coRequisite && (
-                                <Badge
-                                  variant='outline'
-                                  className='hidden sm:inline-flex text-[10px] sm:text-xs'
-                                >
-                                  Co-Req
-                                </Badge>
-                              )}
+                                {course.courseInfo.credits && (
+                                  <Badge variant='outline' className='text-[10px] sm:text-xs'>
+                                    {course.courseInfo.credits}{' '}
+                                    {course.courseInfo.credits === 1 ? 'credit' : 'credits'}
+                                  </Badge>
+                                )}
 
-                              {course.courseInfo.preRequisite && (
-                                <Badge
-                                  variant='outline'
-                                  className='hidden sm:inline-flex text-[10px] sm:text-xs'
-                                >
-                                  Pre-Req
-                                </Badge>
-                              )}
+                                {/* Hide these badges on mobile for space */}
+                                {course.courseInfo.coRequisite && (
+                                  <Badge
+                                    variant='outline'
+                                    className='hidden sm:inline-flex text-[10px] sm:text-xs'
+                                  >
+                                    Co-Req
+                                  </Badge>
+                                )}
+
+                                {course.courseInfo.preRequisite && (
+                                  <Badge
+                                    variant='outline'
+                                    className='hidden sm:inline-flex text-[10px] sm:text-xs'
+                                  >
+                                    Pre-Req
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div className='text-xs sm:text-sm text-muted-foreground mt-0.5 truncate pr-6'>
+                              {course.courseInfo.courseName}
                             </div>
                           </div>
-                          <div className='text-xs sm:text-sm text-muted-foreground mt-0.5 truncate pr-6'>
-                            {course.courseInfo.courseName}
+                          <div className='flex items-center ml-2'>
+                            {isExpanded ? (
+                              <ChevronUp className='h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground' />
+                            ) : (
+                              <ChevronDown className='h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground' />
+                            )}
                           </div>
                         </div>
-                        <div className='flex items-center ml-2'>
-                          {isExpanded ? (
-                            <ChevronUp className='h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground' />
-                          ) : (
-                            <ChevronDown className='h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground' />
-                          )}
-                        </div>
-                      </div>
 
-                      {/* Course details when expanded */}
-                      {isExpanded && (
-                        <div className='p-2 sm:p-3 pt-0'>
-                          <CourseItem
-                            academic={academic}
-                            semester={semester}
-                            course={course}
-                            handleFetchCourse={handleFetchCourse}
-                            selectedClassrooms={selectedClassrooms}
-                            onAddClassroom={onAddClassroom}
-                            activeClassroomIdxs={[]}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                        {/* Course details when expanded */}
+                        {isExpanded && (
+                          <div className='p-2 sm:p-3 pt-0'>
+                            <CourseItem
+                              academic={academic}
+                              semester={semester}
+                              course={course}
+                              handleFetchCourse={handleFetchCourse}
+                              selectedClassrooms={selectedClassrooms}
+                              onAddClassroom={onAddClassroom}
+                              activeClassroomIdxs={[]}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
 
                 {/* Loading indicator - only show when there are more courses to load */}
-                {hasMoreCoursesToLoad && (
+                {!filterState.isSearching && hasMoreCoursesToLoad && (
                   <div ref={loaderRef} className='py-4 text-center'>
                     <Loader2 className='h-5 w-5 animate-spin mx-auto mb-2' />
                     <p className='text-xs text-muted-foreground'>Loading more courses...</p>
@@ -372,11 +457,13 @@ export const CourseList: React.FC<CourseListProps> = ({
                 )}
 
                 {/* End of list indicator */}
-                {!hasMoreCoursesToLoad && filteredCourses.length > 0 && (
-                  <div className='py-4 text-center text-xs text-muted-foreground'>
-                    End of course list
-                  </div>
-                )}
+                {!filterState.isSearching &&
+                  !hasMoreCoursesToLoad &&
+                  filterState.items.length > 0 && (
+                    <div className='py-4 text-center text-xs text-muted-foreground'>
+                      End of course list
+                    </div>
+                  )}
               </div>
             </ScrollArea>
           </div>
