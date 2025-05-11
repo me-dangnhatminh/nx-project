@@ -59,9 +59,9 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
               <label
                 htmlFor={`course-${regId}`}
                 className='font-medium text-xs sm:text-sm cursor-pointer truncate'
-                title={`${course.courseCode} - ${classroom.className}`}
+                title={course.courseName}
               >
-                {course.courseCode} - {classroom.className}
+                {course.courseName}
               </label>
 
               {isConflicted && isActive && (
@@ -82,6 +82,13 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
                   </Tooltip>
                 </TooltipProvider>
               )}
+            </div>
+
+            <div
+              className='text-[10px] sm:text-xs text-muted-foreground truncate'
+              title={classroom.registration.regId}
+            >
+              {classroom.className} - {classroom.registration.regId}
             </div>
 
             <div className='text-[10px] sm:text-xs text-muted-foreground truncate'>
