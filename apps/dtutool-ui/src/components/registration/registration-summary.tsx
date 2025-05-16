@@ -58,10 +58,10 @@ export const RegistrationSummary: React.FC<RegistrationSummaryProps> = ({
         <SummaryItem
           icon={BookOpen}
           label={
-            <>
+            <p className='text-sm font-medium text-foreground'>
               <span className='hidden sm:inline'>Total Courses</span>
               <span className='inline sm:hidden'>Courses</span>
-            </>
+            </p>
           }
           value={`${totalCourses} (${activeTotalCourses} selected)`}
         />

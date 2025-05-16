@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle, MenuIcon, ChevronRight } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import debounce from 'lodash/debounce';
 
 import { Tabs, TabsList, TabsTrigger } from '@shadcn-ui/components/tabs';
 import { Badge } from '@shadcn-ui/components/badge';
@@ -16,7 +17,6 @@ import { SelectedClassroom } from '@shared/types/dtutool';
 import { dtutoolApi } from '@dtutool/apis';
 import { RegistrationSummary, CourseSelectionCard } from '../../components/registration';
 import { CopyLinkButton } from '../../components/registration/copy-link-button';
-import { useURLParamsSetter } from '../../hooks';
 import { ScreenLoading } from '../../components/common/screen-loading';
 import { SwipeSheet } from '../../components/common/swipe-sheet';
 
@@ -34,7 +34,7 @@ type CourseRegistrationState = {
 
 export default function PageClient() {
   const searchParams = useSearchParams();
-  const setURLParams = useURLParamsSetter();
+  const route = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [state, setState] = useState<CourseRegistrationState>({
@@ -74,7 +74,7 @@ export default function PageClient() {
     // Validate tab
     if (tab !== 'calendar' && tab !== 'search') tab = 'search';
 
-    const classrooms = cr?.split('|').map((id) => id.trim());
+    const classrooms = cr?.split('-').map((id) => id.trim());
     let actives: boolean[] | undefined = undefined;
 
     if (classrooms) {
@@ -94,6 +94,32 @@ export default function PageClient() {
 
     return { tab, academic, semester, classrooms, actives };
   }, [searchParams]);
+
+  const setURLParams = useMemo(() => {
+    return debounce(
+      (params: {
+        tab: string;
+        academic: string;
+        semester: string;
+        classrooms: string[];
+        actives: boolean[];
+      }) => {
+        const { tab, academic, semester, classrooms, actives } = params;
+        const newParams = new URLSearchParams();
+
+        if (tab) newParams.set('t', tab);
+        if (academic) newParams.set('a', academic);
+        if (semester) newParams.set('s', semester);
+        if (classrooms.length > 0) newParams.set('cr', classrooms.join('-'));
+        if (actives.length > 0) {
+          const activeString = actives.map((active) => (active ? '1' : '0')).join('');
+          newParams.set('as', activeString);
+        }
+        route.replace(`?${newParams.toString()}`, { scroll: false });
+      },
+      400,
+    );
+  }, []);
 
   useEffect(
     () => {

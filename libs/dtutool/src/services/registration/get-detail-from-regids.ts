@@ -28,6 +28,11 @@ export const parseRegistrationCode = (code: string) => {
   };
 };
 
+export const isValidRegId = (regId: string) => {
+  const regex = /^([A-Z]+)([0-9]+)([0-9]{4})([0-9]{2})([0-9]{3})$/;
+  return regex.test(regId);
+};
+
 export const getDetailFromRegIds = async (params: {
   academic: string;
   semester: number;
