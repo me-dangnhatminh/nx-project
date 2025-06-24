@@ -7,11 +7,13 @@
     "dtutool-ui:build": "nx build dtutool-ui",
     "dtutool-ui:start": "nx start dtutool-ui",
     "dtutool-ui:analyze": "ANALYZE=true nx build dtutool-ui",
-    "format:all": "nx format:write --all"
+    "format:all": "nx format:write --all",
+    "pm-ms-ui:dev": "nx dev pm-ms-ui"
   },
   "private": true,
   "packageManager": "pnpm@10.10.0",
   "dependencies": {
+    "@prisma/client": "^6.10.1",
     "cheerio": "^1.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -56,6 +58,7 @@
     "@types/node": "^20.0.0",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
+    "autoprefixer": "10.4.13",
     "core-js": "^3.36.1",
     "critters": "^0.0.25",
     "eslint": "^9.8.0",
@@ -70,6 +73,7 @@
     "mini-css-extract-plugin": "^2.9.2",
     "nx": "20.8.1",
     "prettier": "^2.6.2",
+    "prisma": "^6.10.1",
     "tailwindcss": "^4.1.5",
     "tslib": "^2.3.0",
     "tw-animate-css": "^1.2.8",
