@@ -7,10 +7,87 @@ generator client {
     provider = "prisma-client-js"
 }
 
-model User {
+// Shema for Project Management Platform
+
+model Account {
     id        String   @id @default(cuid())
     email     String   @unique
-    name      String?
+    password  String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    user User?
+
+    @@map("accounts")
+}
+
+model User {
+    id       String @id @default(cuid())
+    acountId String @unique
+    name     String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    account       Account              @relation(fields: [acountId], references: [id])
+    organizations OrganizationMember[]
+
+    @@map("users")
+}
+
+model Organization {
+    id   String @id @default(cuid())
+    slug String @unique
+    name String
+
+    settings Json?
+
+    createdAt DateTime             @default(now())
+    updatedAt DateTime             @updatedAt
+    members   OrganizationMember[]
+    projects  Project[]
+
+    @@map("organizations")
+}
+
+model OrganizationMember {
+    id             String @id @default(cuid())
+    organizationId String
+    userId         String
+    role           String // e.g., "admin", "member"
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    organization Organization @relation(fields: [organizationId], references: [id])
+    user         User         @relation(fields: [userId], references: [id])
+
+    @@map("organization_members")
+}
+
+model Project {
+    id             String  @id @default(cuid())
+    organizationId String
+    name           String
+    description    String?
+    status         String // e.g., "active", "archived"
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    organization Organization @relation(fields: [organizationId], references: [id])
+
+    @@map("projects")
+}
+
+model ProjectMember {
+    id        String @id @default(cuid())
+    projectId String
+    userId    String
+    role      String // e.g., "owner", "editor", "viewer"
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("project_members")
 }
