@@ -33,3 +33,85 @@ export const SignUpSchema = z
 
 export type SignInFormData = z.infer<typeof SignInSchema>;
 export type SignUpFormData = z.infer<typeof SignUpSchema>;
+
+//
+export interface Project {
+  id: string;
+  name: string;
+  key: string;
+  description?: string;
+  type: 'software' | 'business' | 'service_desk';
+  lead: User;
+  category: string;
+  url?: string;
+  avatar?: string;
+  createdAt: string;
+  updatedAt: string;
+  status: 'active' | 'archived';
+  members: User[];
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role: 'admin' | 'member' | 'viewer';
+  department?: string;
+}
+
+export interface Issue {
+  id: string;
+  key: string;
+  title: string;
+  description?: string;
+  type: 'task' | 'story' | 'bug' | 'epic' | 'subtask';
+  status: 'to_do' | 'in_progress' | 'in_review' | 'done';
+  priority: 'highest' | 'high' | 'medium' | 'low' | 'lowest';
+  assignee?: User;
+  reporter: User;
+  projectId: string;
+  sprintId?: string;
+  parentId?: string;
+  storyPoints?: number;
+  labels: string[];
+  components: string[];
+  fixVersions: string[];
+  createdAt: string;
+  updatedAt: string;
+  dueDate?: string;
+  estimatedTime?: number;
+  loggedTime?: number;
+  attachments: Attachment[];
+  comments: Comment[];
+}
+
+export interface Sprint {
+  id: string;
+  name: string;
+  goal?: string;
+  startDate: string;
+  endDate: string;
+  status: 'planned' | 'active' | 'completed';
+  projectId: string;
+  issues: Issue[];
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  author: User;
+  createdAt: string;
+  updatedAt: string;
+  issueId: string;
+}
+
+export interface Attachment {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+  type: string;
+  uploadedBy: User;
+  uploadedAt: string;
+}
