@@ -1,3 +1,5 @@
+// pnpm prisma db push --schema=apps/pm-ms-ui/src/prisma/schema.prisma --force-reset
+
 generator client {
     provider = "prisma-client-js"
 }
@@ -44,8 +46,9 @@ model Project {
     leadId String
     lead   User   @relation("ProjectLead", fields: [leadId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    removedAt DateTime?
 
     // Relations
     members ProjectMember[]
