@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@shadcn-ui/components/button';
 import { useEffect, useState } from 'react';
 
 export default function Index() {
@@ -30,6 +31,15 @@ export default function Index() {
         <p className='text-gray-700'>
           This is a simple page to display users fetched from the API.
         </p>
+        <Button
+          className='mt-4 w-full'
+          role='button'
+          onClick={() => {
+            window.location.href = '/signin';
+          }}
+        >
+          Login
+        </Button>
       </div>
 
       <div className='mt-8 max-w-md w-full bg-white p-6 rounded-lg shadow-md'>

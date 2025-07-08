@@ -5,9 +5,9 @@ const prisma = new PrismaClient();
 prisma.user
   .createMany({
     data: [
-      { name: 'Alice', email: 'alice@email' },
-      { name: 'Bob', email: 'bob@email' },
-      { name: 'Charlie', email: 'charlie@email' },
+      { name: 'Alice', acountId: 'alice123' },
+      { name: 'Bob', acountId: 'bob123' },
+      { name: 'Charlie', acountId: 'charlie123' },
     ],
     skipDuplicates: true,
   })

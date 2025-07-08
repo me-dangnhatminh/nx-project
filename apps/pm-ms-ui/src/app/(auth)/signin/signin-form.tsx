@@ -5,6 +5,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 import { Button } from '@shadcn-ui/components/button';
 import { Input } from '@shadcn-ui/components/input';
@@ -29,29 +32,31 @@ import { SignInSchema, type SignInFormData } from '@shared/types/pmms';
 export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const form = useForm<SignInFormData>({
     resolver: zodResolver(SignInSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
+    defaultValues: { email: '', password: '' },
   });
 
   async function onSubmit(data: SignInFormData) {
     setIsLoading(true);
 
     try {
-      // TODO: Implement your sign-in logic here
-      console.log('Sign in data:', data);
+      const res = await axios.post('/api/auth/signin', data);
+      const status = res.status;
+      if (status !== 200) throw new Error('Sign in failed');
+      toast('Sign in successful!', { description: 'Welcome back!', duration: 2000 });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Handle successful sign-in (redirect, show success message, etc.)
+      router.push('/dashboard');
     } catch (error) {
-      console.error('Sign-in error:', error);
-      // Handle error (show error message, etc.)
+      console.error('Sign in error:', error);
+      const errMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast.error('Sign in failed. Please check your credentials and try again.', {
+        description: errMsg,
+      });
+      form.reset();
+      setShowPassword(false);
     } finally {
       setIsLoading(false);
     }

@@ -12,8 +12,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@shadcn-ui/components/dropdown-menu';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Menu } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -21,6 +24,20 @@ interface HeaderProps {
 
 export function Header({ onMenuClick }: HeaderProps) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const router = useRouter();
+
+  const handleSignOut = useCallback(async () => {
+    const signingToast = toast.loading('Signing out...');
+    const res = await axios.post('/api/auth/signout', {}, { withCredentials: true });
+    toast.dismiss(signingToast);
+    if (res.status === 200) {
+      toast.success('Signed out successfully');
+      router.push('/signin');
+    } else {
+      console.error('Sign out failed:', res.data);
+      toast.error('Failed to sign out. Please try again.');
+    }
+  }, [router]);
 
   return (
     <header className='h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6'>
@@ -90,7 +107,9 @@ export function Header({ onMenuClick }: HeaderProps) {
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuItem>Help</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Sign out</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSignOut} className='text-red-600 hover:bg-red-50'>
+              Sign out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

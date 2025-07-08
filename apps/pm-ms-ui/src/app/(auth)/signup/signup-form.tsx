@@ -25,11 +25,15 @@ import {
   FormMessage,
 } from '@shadcn-ui/components/form';
 import { SignUpSchema, type SignUpFormData } from '@shared/types/pmms';
+import { useRouter } from 'next/navigation';
+import { useToast } from '../../../hooks/use-toast';
 
 export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(SignUpSchema),
@@ -45,16 +49,35 @@ export function SignUpForm() {
     setIsLoading(true);
 
     try {
-      // TODO: Implement your sign-up logic here
-      console.log('Sign up data:', data);
+      const response = await fetch('api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const result = await response.json();
 
-      // Handle successful sign-up (redirect, show success message, etc.)
+      if (!response.ok) {
+        throw new Error(result.error || 'Sign up failed');
+      }
+
+      toast({
+        title: 'Success!',
+        description: 'Your account has been created successfully.',
+      });
+
+      // Redirect to dashboard
+      router.push('/dashboard');
+      router.refresh();
     } catch (error) {
       console.error('Sign-up error:', error);
-      // Handle error (show error message, etc.)
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Sign up failed. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
