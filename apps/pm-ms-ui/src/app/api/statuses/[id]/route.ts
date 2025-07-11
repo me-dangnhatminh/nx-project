@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { statusService } from 'apps/pm-ms-ui/src/lib/services/statusService';
+import { statusService } from '@pm-ms-ui/lib/services/status';
 import { updateStatusSchema } from 'apps/pm-ms-ui/src/lib/types/status';
 
 interface RouteParams {

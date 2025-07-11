@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { statusService } from 'apps/pm-ms-ui/src/lib/services/statusService';
+import { statusService } from '@pm-ms-ui/lib/services/status';
 import { createStatusSchema } from 'apps/pm-ms-ui/src/lib/types/status';
 
 export async function GET(request: NextRequest) {

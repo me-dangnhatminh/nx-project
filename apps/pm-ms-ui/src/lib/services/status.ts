@@ -2,8 +2,26 @@ import { prisma } from '../prisma';
 import { CreateStatusInput, UpdateStatusInput, StatusQueryInput } from '../types/status';
 import { NextRequest } from 'next/server';
 
+const createStatus = async (data: CreateStatusInput) => {
+  let sequence = data.sequence ?? null;
+  if (!sequence) {
+    const lastStatus = await prisma.issueStatus.findFirst({ orderBy: { sequence: 'desc' } });
+    sequence = (lastStatus?.sequence || 0) + 10;
+  }
+
+  const status = await prisma.issueStatus.create({
+    data: {
+      name: data.name,
+      description: data.description || `Status: ${data.name}`,
+      color: data.color || '#6B7280', // Default gray color
+      sequence: sequence,
+    },
+  });
+
+  return status;
+};
+
 export class StatusService {
-  // Get current user ID from request cookies
   private getCurrentUserId(request?: NextRequest): string {
     if (!request) {
       throw new Error('Request object is required to get current user');
@@ -39,7 +57,7 @@ export class StatusService {
     return status;
   }
 
-  async getStatuses(query: StatusQueryInput = {}) {
+  async getStatuses(query: StatusQueryInput = { page: 1, limit: 50 }) {
     const { page, limit } = query;
     const skip = (page - 1) * limit;
 
@@ -78,8 +96,6 @@ export class StatusService {
   }
 
   async updateStatus(id: string, data: UpdateStatusInput, request: NextRequest) {
-    const currentUserId = this.getCurrentUserId(request);
-
     // Check if status exists
     const existingStatus = await prisma.issueStatus.findUnique({
       where: { id },

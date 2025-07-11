@@ -286,7 +286,7 @@ const BoardContainer: React.FC<{ projectId: string }> = ({ projectId }) => {
       setLoading(true);
       setError(null);
 
-      const projectData = await apiCall(`/api/projects/${projectId}/board`);
+      const projectData = await apiCall(`/api/projects/${projectId}/view/board`);
       const { statuses: apiStatuses, issues: apiIssues } = projectData;
 
       // Set statuses
@@ -348,13 +348,36 @@ const BoardContainer: React.FC<{ projectId: string }> = ({ projectId }) => {
       }
 
       if (type === 'column') {
+        // Handle column reordering
         const newColumns = Array.from(columns);
         const [movedColumn] = newColumns.splice(source.index, 1);
         newColumns.splice(destination.index, 0, movedColumn);
+
+        // Update local state immediately for UI responsiveness
         setColumns(newColumns);
+
+        try {
+          // Save new order to database
+          const statusIds = newColumns.map((col) => col.id);
+          await apiCall('/api/statuses/reorder', {
+            method: 'POST',
+            body: JSON.stringify({ statusIds }),
+          });
+
+          console.log('Column order saved successfully');
+        } catch (error) {
+          console.error('Error saving column order:', error);
+
+          // Revert to original order on error
+          loadProjectData();
+
+          // You might want to show a toast notification here
+          alert('Failed to save column order. Changes have been reverted.');
+        }
         return;
       }
 
+      // Handle issue drag & drop (existing logic)
       const sourceColumn = columns.find((col) => col.id === source.droppableId);
       const destColumn = columns.find((col) => col.id === destination.droppableId);
 
@@ -404,10 +427,12 @@ const BoardContainer: React.FC<{ projectId: string }> = ({ projectId }) => {
         } catch (error) {
           console.error('Error updating issue status:', error);
           // Revert the move on error
+          loadProjectData();
+          alert('Failed to update issue status. Changes have been reverted.');
         }
       }
     },
-    [columns],
+    [columns, loadProjectData],
   );
 
   const handleIssueClick = useCallback((issue: Issue) => {
