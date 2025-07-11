@@ -1,27 +1,27 @@
 import { compare, hash } from 'bcryptjs';
 import { cookies } from 'next/headers';
-import { prisma } from './prisma';
+import { prisma } from '../prisma';
 import { jwtVerify, SignJWT } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-jwt-key');
 const JWT_EXPIRES_IN = '7d';
 
 export type JWTPayload = {
+  firstName?: string;
+  lastName?: string;
   userId: string;
   email: string;
-  name: string;
-  role: string;
 };
 
-export async function hashPassword(password: string): Promise<string> {
+async function hashPassword(password: string): Promise<string> {
   return await hash(password, 12);
 }
 
-export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
   return await compare(password, hashedPassword);
 }
 
-export function generateToken(payload: JWTPayload): Promise<string> {
+async function generateToken(payload: JWTPayload): Promise<string> {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -29,7 +29,7 @@ export function generateToken(payload: JWTPayload): Promise<string> {
     .sign(JWT_SECRET);
 }
 
-export async function verifyToken(token: string): Promise<JWTPayload | null> {
+async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
     // return verify(token, JWT_SECRET) as JWTPayload;
     const { payload } = await jwtVerify(token, JWT_SECRET);
@@ -40,7 +40,7 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
   }
 }
 
-export async function setAuthCookie(user: JWTPayload) {
+async function setAuthCookie(user: JWTPayload) {
   const token = await generateToken(user);
   const cookieStore = await cookies();
 
@@ -53,12 +53,12 @@ export async function setAuthCookie(user: JWTPayload) {
   });
 }
 
-export async function removeAuthCookie() {
+async function removeAuthCookie() {
   const cookieStore = await cookies();
   cookieStore.delete('auth-token');
 }
 
-export async function getAuthUser(): Promise<JWTPayload | null> {
+async function getAuthUser(): Promise<JWTPayload | null> {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('auth-token')?.value;
@@ -87,10 +87,21 @@ export async function getAuthUser(): Promise<JWTPayload | null> {
   }
 }
 
-export async function requireAuth(): Promise<JWTPayload> {
+async function requireAuth(): Promise<JWTPayload> {
   const user = await getAuthUser();
   if (!user) {
     throw new Error('Authentication required');
   }
   return user;
 }
+
+export const authServices = {
+  hashPassword,
+  verifyPassword,
+  generateToken,
+  verifyToken,
+  setAuthCookie,
+  removeAuthCookie,
+  getAuthUser,
+  requireAuth,
+};

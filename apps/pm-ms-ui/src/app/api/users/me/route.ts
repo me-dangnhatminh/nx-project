@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUser } from '../../../../lib/auth';
-import { prisma } from '../../../../lib/prisma';
+import { authServices } from 'apps/pm-ms-ui/src/lib/services/auth';
+import { prisma } from 'apps/pm-ms-ui/src/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
-    const authUser = await getAuthUser();
+    const authUser = await authServices.getAuthUser();
 
     if (!authUser) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -16,10 +16,9 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         email: true,
-        name: true,
-        role: true,
+        firstName: true,
+        lastName: true,
         avatar: true,
-        department: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -29,7 +28,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ user });
+    return NextResponse.json({ data: user }, { status: 200 });
   } catch (error) {
     console.error('Get user error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

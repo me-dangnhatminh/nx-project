@@ -1,7 +1,9 @@
 import { SignUpSchema } from '@shared/types/pmms';
-import { hashPassword, setAuthCookie } from '../../../../lib/auth';
-import { prisma } from '../../../../lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
+
+import { prisma } from '@pm-ms-ui/lib/prisma';
+import { userServices } from '@pm-ms-ui/lib/services/user';
+import { authServices } from '@pm-ms-ui/lib/services/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,53 +18,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, password } = result.data;
+    const { email, password } = result.data;
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-    });
+    const existingUser = await userServices.findUser('email', email.toLowerCase());
 
     if (existingUser) {
       return NextResponse.json({ error: 'User with this email already exists' }, { status: 409 });
     }
 
     // Hash password
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await authServices.hashPassword(password);
 
     // Create user
     const user = await prisma.user.create({
       data: {
-        name,
+        firstName: result.data.firstName,
+        lastName: result.data.lastName,
         email: email.toLowerCase(),
-        password: hashedPassword,
-        role: 'MEMBER',
+        credential: hashedPassword,
       },
+      select: { id: true, email: true, firstName: true, lastName: true, avatar: true },
     });
 
     // Set auth cookie
-    await setAuthCookie({
+    await authServices.setAuthCookie({
+      firstName: user.firstName,
+      lastName: user.lastName,
       userId: user.id,
       email: user.email,
-      name: user.name,
-      role: user.role,
     });
 
-    // Return user data (without password)
-    const userData = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      avatar: user.avatar,
-      department: user.department,
-    };
-
     return NextResponse.json(
-      {
-        message: 'Account created successfully',
-        user: userData,
-      },
+      { message: 'Account created successfully', data: user },
       { status: 201 },
     );
   } catch (error) {

@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
-import { SignInSchema } from '@shared/types/pmms';
-import { setAuthCookie, verifyPassword } from '../../../../lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
-
-const prisma = new PrismaClient();
+import { SignInSchema } from '@shared/types/pmms';
+import { userServices } from 'apps/pm-ms-ui/src/lib/services/user';
+import { authServices } from 'apps/pm-ms-ui/src/lib/services/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,49 +10,36 @@ export async function POST(request: NextRequest) {
     // Validate input
     const result = SignInSchema.safeParse(body);
     if (!result.success) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: result.error.issues },
-        { status: 400 },
-      );
+      const issues = result.error.issues.map((issue) => ({
+        path: issue.path.join('.'),
+        message: issue.message,
+      }));
+      return NextResponse.json({ error: 'Invalid input', details: issues }, { status: 400 });
     }
 
     const { email, password } = result.data;
 
     // Find user
-    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
-    }
+    const user = await userServices.findUserWithCredential('email', email.toLowerCase());
+    if (!user) return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
 
     // Verify password
-    const isValidPassword = await verifyPassword(password, user.password);
+    const isValidPassword = await authServices.verifyPassword(password, user.credential);
     if (!isValidPassword) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
     // Set auth cookie
-    await setAuthCookie({
+    await authServices.setAuthCookie({
+      firstName: user.firstName,
+      lastName: user.lastName,
       userId: user.id,
       email: user.email,
-      name: user.name,
-      role: user.role,
     });
 
-    // Return user data (without password)
-    const userData = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      avatar: user.avatar,
-      department: user.department,
-    };
+    const { credential, ...userData } = user;
 
-    return NextResponse.json({
-      message: 'Sign in successful',
-      user: userData,
-    });
+    return NextResponse.json({ message: 'Sign in successful', data: userData });
   } catch (error) {
     console.error('Sign in error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { Button } from '@shadcn-ui/components/button';
 import { Input } from '@shadcn-ui/components/input';
@@ -26,19 +26,43 @@ import {
 } from '@shadcn-ui/components/form';
 import { SignUpSchema, type SignUpFormData } from '@shared/types/pmms';
 import { useRouter } from 'next/navigation';
-import { useToast } from '../../../hooks/use-toast';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
+import { authApi } from 'apps/pm-ms-ui/src/lib/api/auth';
 
 export function SignUpForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
+
+  const signUpMutation = useMutation({
+    mutationFn: authApi.signUp,
+    mutationKey: ['signUp'],
+    throwOnError: false,
+    onSuccess: () => {
+      router.push('/signin');
+    },
+    onError: (error) => {
+      const status = (error as any).response?.status; // TODO: fix
+      if (status === 409) {
+        form.setError('email', {
+          type: 'manual',
+          message: 'User with this email already exists',
+        });
+      } else {
+        const errMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
+        toast.error(errMsg, {
+          description: 'Please try again or contact support if the issue persists.',
+          duration: 2000,
+        });
+      }
+    },
+  });
 
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -46,41 +70,7 @@ export function SignUpForm() {
   });
 
   async function onSubmit(data: SignUpFormData) {
-    setIsLoading(true);
-
-    try {
-      const response = await fetch('api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Sign up failed');
-      }
-
-      toast({
-        title: 'Success!',
-        description: 'Your account has been created successfully.',
-      });
-
-      // Redirect to dashboard
-      router.push('/dashboard');
-      router.refresh();
-    } catch (error) {
-      console.error('Sign-up error:', error);
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Sign up failed. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    await signUpMutation.mutateAsync(data);
   }
 
   return (
@@ -94,25 +84,46 @@ export function SignUpForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            <FormField
-              control={form.control}
-              name='name'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='Enter your full name'
-                      type='text'
-                      autoComplete='name'
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              <FormField
+                control={form.control}
+                name='firstName'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='Enter your first name'
+                        type='text'
+                        autoComplete='firstName'
+                        disabled={signUpMutation.isPending}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='lastName'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='Enter your last name'
+                        type='text'
+                        autoComplete='lastName'
+                        disabled={signUpMutation.isPending}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name='email'
@@ -124,7 +135,7 @@ export function SignUpForm() {
                       placeholder='Enter your email'
                       type='email'
                       autoComplete='email'
-                      disabled={isLoading}
+                      disabled={signUpMutation.isPending}
                       {...field}
                     />
                   </FormControl>
@@ -139,29 +150,13 @@ export function SignUpForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <div className='relative'>
-                      <Input
-                        placeholder='Create a password'
-                        type={showPassword ? 'text' : 'password'}
-                        autoComplete='new-password'
-                        disabled={isLoading}
-                        {...field}
-                      />
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='sm'
-                        className='absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent'
-                        onClick={() => setShowPassword(!showPassword)}
-                        disabled={isLoading}
-                      >
-                        {showPassword ? (
-                          <EyeOff className='h-4 w-4' />
-                        ) : (
-                          <Eye className='h-4 w-4' />
-                        )}
-                      </Button>
-                    </div>
+                    <Input
+                      placeholder='Create a password'
+                      type={'password'}
+                      autoComplete='new-password'
+                      disabled={signUpMutation.isPending}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -174,36 +169,20 @@ export function SignUpForm() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <div className='relative'>
-                      <Input
-                        placeholder='Confirm your password'
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        autoComplete='new-password'
-                        disabled={isLoading}
-                        {...field}
-                      />
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='sm'
-                        className='absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent'
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        disabled={isLoading}
-                      >
-                        {showConfirmPassword ? (
-                          <EyeOff className='h-4 w-4' />
-                        ) : (
-                          <Eye className='h-4 w-4' />
-                        )}
-                      </Button>
-                    </div>
+                    <Input
+                      placeholder='Confirm your password'
+                      type='password'
+                      autoComplete='new-password'
+                      disabled={signUpMutation.isPending}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type='submit' className='w-full' disabled={isLoading}>
-              {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+            <Button type='submit' className='w-full' disabled={signUpMutation.isPending}>
+              {signUpMutation.isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
               Create Account
             </Button>
           </form>

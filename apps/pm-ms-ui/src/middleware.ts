@@ -1,33 +1,72 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyToken } from './lib/auth';
+import { authServices } from './lib/services/auth';
 
-// Routes that require authentication
 const protectedRoutes = ['/dashboard', '/projects', '/calendar', '/reports', '/settings'];
-
-// Routes that should redirect to dashboard if user is already authenticated
 const authRoutes = ['/signin', '/signup'];
 
-export function middleware(request: NextRequest) {
+const authenticated = async (request: NextRequest) => {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('auth-token')?.value;
 
-  // Check if user is authenticated
-  const isAuthenticated = !!token && !!verifyToken(token);
+  const isAuthRoute = authRoutes.includes(pathname);
+  const isProtectedRoute = protectedRoutes.some(
+    (route) => pathname.startsWith(`${route}/`) || pathname === route,
+  );
 
-  // Redirect authenticated users away from auth pages
-  if (authRoutes.includes(pathname) && isAuthenticated) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
+  const removeAuthCookie = (response: NextResponse) => {
+    response.cookies.set({
+      name: 'auth-token',
+      value: '',
+      maxAge: 0,
+      path: '/',
+    });
+  };
 
-  // Redirect unauthenticated users to signin page
-  if (protectedRoutes.some((route) => pathname.startsWith(route)) && !isAuthenticated) {
+  const redirectToSignin = () => {
     const url = new URL('/signin', request.url);
     url.searchParams.set('from', pathname);
     return NextResponse.redirect(url);
+  };
+
+  const redirectToDashboard = () => NextResponse.redirect(new URL('/dashboard', request.url));
+
+  if (!token) {
+    if (isAuthRoute) return NextResponse.next();
+    if (isProtectedRoute) return redirectToSignin();
+    return NextResponse.next();
   }
 
-  return NextResponse.next();
+  try {
+    const verified = await authServices.verifyToken(token);
+    if (!verified) {
+      const res = redirectToSignin();
+      removeAuthCookie(res);
+      return res;
+    }
+
+    // const user = await userServices.findUser('email', verified.email); // TODO: fix
+    // if (!user) {
+    //   const res = redirectToSignin();
+    //   removeAuthCookie(res);
+    //   return res;
+    // }
+
+    if (isAuthRoute) return redirectToDashboard();
+
+    const response = NextResponse.next();
+    response.cookies.set({ name: 'x-user-id', value: verified.userId, path: '/' });
+    return response;
+  } catch (err) {
+    console.error('Auth middleware error:', err);
+    const res = redirectToSignin();
+    removeAuthCookie(res);
+    return res;
+  }
+};
+
+export async function middleware(request: NextRequest) {
+  return authenticated(request);
 }
 
 export const config = {

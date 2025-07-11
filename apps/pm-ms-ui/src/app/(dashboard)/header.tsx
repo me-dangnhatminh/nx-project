@@ -17,6 +17,7 @@ import { Menu } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useMe } from 'apps/pm-ms-ui/src/hooks/use-user';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -25,17 +26,20 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const router = useRouter();
+  const getMe = useMe(true);
 
   const handleSignOut = useCallback(async () => {
-    const signingToast = toast.loading('Signing out...');
-    const res = await axios.post('/api/auth/signout', {}, { withCredentials: true });
-    toast.dismiss(signingToast);
-    if (res.status === 200) {
-      toast.success('Signed out successfully');
+    try {
+      await toast.promise(axios.post('/api/auth/signout', {}, { withCredentials: true }), {
+        loading: 'Signing out...',
+        success: 'Signed out successfully!',
+        error: 'Sign out failed',
+      });
+
       router.push('/signin');
-    } else {
-      console.error('Sign out failed:', res.data);
-      toast.error('Failed to sign out. Please try again.');
+    } catch (err) {
+      console.error('Sign out error:', err);
+      // Không cần toast.error nữa vì toast.promise đã xử lý
     }
   }, [router]);
 
@@ -93,7 +97,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
               <Avatar className='h-8 w-8'>
-                <AvatarImage src='/avatar.png' alt='User' />
+                <AvatarImage src={'https://via.placeholder.com/150'} alt='User' />
                 <AvatarFallback>
                   <User className='w-4 h-4' />
                 </AvatarFallback>
@@ -101,9 +105,17 @@ export function Header({ onMenuClick }: HeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className='w-56' align='end'>
-            <DropdownMenuLabel>me-dangnhatminh</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              {getMe.data ? `${getMe.data.firstName} ${getMe.data.lastName}` : 'User'}
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                router.push('/profile');
+              }}
+            >
+              Profile
+            </DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuItem>Help</DropdownMenuItem>
             <DropdownMenuSeparator />

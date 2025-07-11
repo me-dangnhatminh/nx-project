@@ -10,11 +10,14 @@ export const SignInSchema = z.object({
 
 export const SignUpSchema = z
   .object({
-    name: z
+    firstName: z
       .string()
-      .min(1, 'Name is required')
-      .min(2, 'Name must be at least 2 characters')
-      .max(50, 'Name must be less than 50 characters'),
+      .min(1, 'First name is required')
+      .max(50, 'First name must be less than 50 characters'),
+    lastName: z
+      .string()
+      .min(1, 'Last name is required')
+      .max(50, 'Last name must be less than 50 characters'),
     email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
     password: z
       .string()
@@ -34,29 +37,55 @@ export const SignUpSchema = z
 export type SignInFormData = z.infer<typeof SignInSchema>;
 export type SignUpFormData = z.infer<typeof SignUpSchema>;
 
-//
+// User Schemas
+const FirstNameSchema = z
+  .string()
+  .min(1, 'First name is required')
+  .max(50, 'First name must be less than 50 characters');
+const LastNameSchema = z
+  .string()
+  .min(1, 'Last name is required')
+  .max(50, 'Last name must be less than 50 characters');
+const EmailSchema = z.string().email('Please enter a valid email address');
+const AvatarSchema = z.any();
 
 export const UserSchema = z.object({
   id: z.string(),
-  name: z.string().min(1, 'Name is required').max(50, 'Name must be less than 50 characters'),
-  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
-  avatar: z.string().optional(),
-  role: z.enum(['admin', 'member', 'viewer'], {
-    message: 'Role must be one of: admin, member, viewer',
-  }),
-  department: z.string().optional(),
+  firstName: FirstNameSchema,
+  lastName: LastNameSchema,
+  email: EmailSchema,
+  avatar: AvatarSchema.optional(),
+  credential: z.string().nullish(),
+  createdAt: z.string().datetime('Invalid date format for createdAt').nullish(),
+  updatedAt: z.string().datetime('Invalid date format for updatedAt').nullish(),
+});
+
+// Project Schemas
+const ProjectNameSchema = z
+  .string()
+  .min(1, 'Project name is required')
+  .max(100, 'Project name must be less than 100 characters');
+const ProjectKeySchema = z
+  .string()
+  .min(1, 'Project key is required')
+  .max(20, 'Project key must be less than 20 characters')
+  .regex(
+    /^[A-Z0-9_-]+$/,
+    'Project key must contain only uppercase letters, numbers, underscores, and hyphens',
+  );
+
+const ProjectMemberSchema = z.object({
+  id: UserSchema.shape.id,
+  firstName: UserSchema.shape.firstName,
+  lastName: UserSchema.shape.lastName,
+  email: UserSchema.shape.email,
+  avatar: UserSchema.shape.avatar.optional(),
 });
 
 export const ProjectSchema = z.object({
   id: z.string(),
-  name: z
-    .string()
-    .min(1, 'Project name is required')
-    .max(100, 'Project name must be less than 100 characters'),
-  key: z
-    .string()
-    .min(1, 'Project key is required')
-    .max(20, 'Project key must be less than 20 characters'),
+  name: ProjectNameSchema,
+  key: ProjectKeySchema,
   description: z.string().optional(),
   type: z.enum(['software', 'business', 'service_desk'], {
     message: 'Project type must be one of: software, business, service_desk',

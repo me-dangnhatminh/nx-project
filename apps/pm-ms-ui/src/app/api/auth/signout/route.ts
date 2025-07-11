@@ -1,10 +1,9 @@
-import { removeAuthCookie } from '../../../../lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { authServices } from 'apps/pm-ms-ui/src/lib/services/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    // Remove auth cookie
-    await removeAuthCookie();
+    await authServices.removeAuthCookie();
     return NextResponse.json({ message: 'Signed out successfully' }, { status: 200 });
   } catch (error) {
     console.error('Sign out error:', error);

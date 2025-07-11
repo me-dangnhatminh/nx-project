@@ -28,11 +28,29 @@ import {
   FormMessage,
 } from '@shadcn-ui/components/form';
 import { SignInSchema, type SignInFormData } from '@shared/types/pmms';
+import { useMutation } from '@tanstack/react-query';
+import { authApi } from 'apps/pm-ms-ui/src/lib/api/auth';
 
 export function SignInForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+
+  const signInMutation = useMutation({
+    mutationFn: async (data: SignInFormData) => {
+      const response = await authApi.signIn(data);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      toast('Sign in successful!', { description: 'Welcome back!', duration: 2000 });
+      router.push('/dashboard');
+    },
+    onError: (error) => {
+      console.error('Sign in error:', error);
+      const errMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast.error('Sign in failed. Please check your credentials and try again.', {
+        description: errMsg,
+      });
+    },
+  });
 
   const form = useForm<SignInFormData>({
     resolver: zodResolver(SignInSchema),
@@ -40,26 +58,7 @@ export function SignInForm() {
   });
 
   async function onSubmit(data: SignInFormData) {
-    setIsLoading(true);
-
-    try {
-      const res = await axios.post('/api/auth/signin', data);
-      const status = res.status;
-      if (status !== 200) throw new Error('Sign in failed');
-      toast('Sign in successful!', { description: 'Welcome back!', duration: 2000 });
-
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Sign in error:', error);
-      const errMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
-      toast.error('Sign in failed. Please check your credentials and try again.', {
-        description: errMsg,
-      });
-      form.reset();
-      setShowPassword(false);
-    } finally {
-      setIsLoading(false);
-    }
+    await signInMutation.mutateAsync(data);
   }
 
   return (
@@ -84,7 +83,7 @@ export function SignInForm() {
                       placeholder='Enter your email'
                       type='email'
                       autoComplete='email'
-                      disabled={isLoading}
+                      disabled={signInMutation.isPending}
                       {...field}
                     />
                   </FormControl>
@@ -99,36 +98,20 @@ export function SignInForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <div className='relative'>
-                      <Input
-                        placeholder='Enter your password'
-                        type={showPassword ? 'text' : 'password'}
-                        autoComplete='current-password'
-                        disabled={isLoading}
-                        {...field}
-                      />
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='sm'
-                        className='absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent'
-                        onClick={() => setShowPassword(!showPassword)}
-                        disabled={isLoading}
-                      >
-                        {showPassword ? (
-                          <EyeOff className='h-4 w-4' />
-                        ) : (
-                          <Eye className='h-4 w-4' />
-                        )}
-                      </Button>
-                    </div>
+                    <Input
+                      placeholder='Enter your password'
+                      type='password'
+                      autoComplete='current-password'
+                      disabled={signInMutation.isPending}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type='submit' className='w-full' disabled={isLoading}>
-              {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+            <Button type='submit' className='w-full' disabled={signInMutation.isPending}>
+              {signInMutation.isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
               Sign In
             </Button>
           </form>
