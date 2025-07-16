@@ -1,13 +1,5 @@
-import { createStore } from 'zustand';
 import { useQuery } from '@tanstack/react-query';
 import { userApi } from 'apps/pm-ms-ui/src/lib/api/user';
-
-type User = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-};
 
 export type UserStore = {
   user: User | null;
@@ -29,5 +21,19 @@ export const useMe = (isLoggedIn: boolean = false) => {
       }; // TODO: fix as
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
+
+export const useUserSearch = (text?: string) => {
+  return useQuery({
+    queryKey: ['users', 'search', text],
+    queryFn: async (): ReturnType<typeof userApi.searchUser> => {
+      if (!text) return { items: [] };
+      const response = await userApi.searchUser(text);
+      return response;
+    },
+    enabled: !!text,
+    staleTime: 0,
+    gcTime: 10000,
   });
 };

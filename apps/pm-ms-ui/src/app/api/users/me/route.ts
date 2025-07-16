@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authServices } from 'apps/pm-ms-ui/src/lib/services/auth';
 import { prisma } from 'apps/pm-ms-ui/src/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
-    const authUser = await authServices.getAuthUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
+    const userId = request.cookies.get('x-user-id')?.value;
+    if (!userId) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
     // Get full user data from database
     const user = await prisma.user.findUnique({
-      where: { id: authUser.userId },
+      where: { id: userId },
       select: {
         id: true,
         email: true,

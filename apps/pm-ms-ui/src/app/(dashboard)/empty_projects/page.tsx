@@ -43,7 +43,7 @@ import { ProjectCard } from '../../../components/project/project-card';
 import CreateProjectForm from './create-project-form';
 import EditProjectForm from './edit-project-form';
 import { Project, User } from '@shared/types/pmms';
-import { projectsApi } from '../../../lib/api/projects';
+import { projectsApi } from 'apps/pm-ms-ui/src/lib/api/project';
 import { toast } from 'sonner';
 import { MoreHorizontal } from 'lucide-react';
 import DeleteConfirmationDialog from './delete-confirmation-dialog';

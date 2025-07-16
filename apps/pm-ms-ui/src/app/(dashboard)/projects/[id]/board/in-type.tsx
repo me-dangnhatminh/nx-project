@@ -44,23 +44,3 @@ export interface Activity {
   timestamp: Date;
   type: 'HISTORY' | 'COMMENT';
 }
-
-export interface Issue {
-  id: string;
-  title: string;
-  description?: string;
-  status?: string;
-  priority?: string;
-  assignee?: User;
-  reporter?: User;
-  dueDate?: Date;
-  startDate?: Date;
-  labels?: string[];
-  category?: string;
-  team?: string;
-  timeTracked?: number;
-  createdAt?: string;
-  updatedAt?: string;
-  activities?: Activity[];
-  [key: string]: any;
-}

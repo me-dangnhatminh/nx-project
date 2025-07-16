@@ -1,32 +1,37 @@
-// app/api/projects/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { projectServices } from '@pm-ms-ui/lib/services/project';
-import { authServices } from '@pm-ms-ui/lib/services/auth';
-import { ProjectCreateSchema } from 'apps/pm-ms-ui/src/lib/api/v2.project';
+import { projectCreate, projectDelete, projectList } from 'apps/pm-ms-ui/src/lib/services/project';
+import { CreateProjectSchema } from 'apps/pm-ms-ui/src/lib/schemas/project';
+import z from 'zod';
 
-const authenticateUser = async (request: NextRequest) => {
-  const token = request.cookies.get('auth-token')?.value;
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const verifiedUser = await authServices.verifyToken(token);
-  if (!verifiedUser) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-};
-
-// POST /api/projects - Create new project
 export async function POST(request: NextRequest) {
-  const userId = request.cookies.get('x-user-id')?.value;
-  if (!userId) return NextResponse.json({ error: 'User ID not found' }, { status: 400 });
+  try {
+    const userId = request.cookies.get('x-user-id')?.value;
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const formData = await request.formData();
-  const body = ProjectCreateSchema.parse(Object.fromEntries(formData.entries()));
-
-  const project = await projectServices.createProject(body);
-  return NextResponse.json(project);
+    const formData = await request.formData();
+    const body = Object.fromEntries(formData.entries());
+    const valid = CreateProjectSchema.parse(body);
+    await projectCreate(valid);
+    return NextResponse.json({ message: 'Project created successfully' }, { status: 201 });
+  } catch (error) {
+    console.error(error);
+    if (error instanceof z.ZodError) {
+      const errMsg = error.errors.map((e) => e.message).join(', ');
+      return NextResponse.json({ error: errMsg }, { status: 400 });
+    }
+    return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
+  }
 }
 
 // GET /api/projects - List projects
 export async function GET(request: NextRequest) {
-  const userId = request.cookies.get('x-user-id')?.value;
-  if (!userId) return NextResponse.json({ error: 'User ID not found' }, { status: 400 });
-  const data = await projectServices.listProjects({ requesterId: userId });
-  return NextResponse.json(data);
+  try {
+    const userId = request.cookies.get('x-user-id')?.value;
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const data = await projectList({ requesterId: userId });
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
+  }
 }

@@ -1,55 +1,28 @@
 import { Draggable } from '@hello-pangea/dnd';
-import React, { useCallback } from 'react';
-
-import { Avatar, AvatarFallback, AvatarImage } from '@shadcn-ui/components/avatar';
+import React from 'react';
 import { format } from 'date-fns';
-
-export interface Issue {
-  id: string;
-  title: string;
-  description?: string;
-  status?: string;
-  priority?: string;
-  assignee?: {
-    id: string;
-    name: string;
-    email: string;
-    avatar: string;
-  };
-  dueDate?: Date;
-  createdAt?: string;
-  updatedAt?: string;
-  [key: string]: any;
-}
+import { useMutation } from '@tanstack/react-query';
+import { Loader, Trash2 } from 'lucide-react';
+import { cn } from '@shared/utils';
+import { toast } from 'sonner';
+import { issueApi } from 'apps/pm-ms-ui/src/lib/api/issue';
+import { Issue } from 'apps/pm-ms-ui/src/lib/types';
 
 export interface BoardIssueProps {
   issue: Issue;
   index: number;
   columnId: string;
-  onClick?: (issue: Issue) => void;
-  onUpdate?: (issue: Issue) => void;
-  onDelete?: (issueId: string, columnId: string) => void;
 }
 
-export const BoardIssue: React.FC<BoardIssueProps> = ({
-  issue,
-  index,
-  columnId,
-  onClick,
-  onUpdate,
-  onDelete,
-}) => {
-  const handleDelete = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onDelete?.(issue.id, columnId);
+export const BoardIssue: React.FC<BoardIssueProps> = ({ issue, index }) => {
+  const deleteIssue = useMutation({
+    mutationFn: async (issueId: string) => {
+      return issueApi.delete(issue.projectId, issueId);
     },
-    [issue.id, columnId, onDelete],
-  );
-
-  const handleClick = useCallback(() => {
-    onClick?.(issue);
-  }, [issue, onClick]);
+    onSuccess: () => {
+      toast.success('Issue deleted successfully');
+    },
+  });
 
   return (
     <Draggable draggableId={issue.id} index={index}>
@@ -58,29 +31,25 @@ export const BoardIssue: React.FC<BoardIssueProps> = ({
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`
-            issue bg-white border border-gray-200 p-3 rounded-lg mb-2 cursor-pointer 
-            shadow-sm hover:shadow-md transition-shadow duration-200
-            ${snapshot.isDragging ? 'shadow-lg rotate-2' : ''}
-          `}
-          onClick={handleClick}
+          className={cn(
+            'issue bg-white border border-gray-200 p-3 rounded-lg cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200',
+            snapshot.isDragging ? 'shadow-lg rotate-2' : '',
+          )}
         >
-          <div className='flex justify-between items-start mb-2'>
-            <h3 className='font-semibold text-gray-800 text-sm line-clamp-2'>{issue.title}</h3>
-            <button
-              className='text-gray-400 hover:text-red-500 transition-colors duration-200 ml-2 flex-shrink-0'
-              onClick={handleDelete}
-              title='Delete issue'
-            >
-              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
-                />
-              </svg>
-            </button>
+          <div className='flex justify-between items-center'>
+            <h3 className='font-semibold text-gray-800 text-sm line-clamp-2'>{issue.summary}</h3>
+            {deleteIssue.isPending ? (
+              <Loader className='h-4 w-4 text-gray-400 animate-spin' aria-label='Deleting issue' />
+            ) : (
+              <Trash2
+                className='h-4 w-4 text-gray-400 hover:text-red-500 transition-colors duration-200'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteIssue.mutate(issue.id);
+                }}
+                aria-label='Delete issue'
+              />
+            )}
           </div>
 
           {issue.description && (
@@ -89,7 +58,7 @@ export const BoardIssue: React.FC<BoardIssueProps> = ({
 
           <div className='flex justify-between items-center'>
             <div className='flex items-center gap-2'>
-              {issue.priority && (
+              {/* {issue.priority && (
                 <span
                   className={`
                   px-2 py-1 rounded-full text-xs font-medium
@@ -100,7 +69,7 @@ export const BoardIssue: React.FC<BoardIssueProps> = ({
                 >
                   {issue.priority}
                 </span>
-              )}
+              )} */}
               {issue.dueDate && (
                 <span className='text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded border border-orange-300'>
                   {format(new Date(issue.dueDate), 'MMM dd, yyyy')}
@@ -108,7 +77,7 @@ export const BoardIssue: React.FC<BoardIssueProps> = ({
               )}
             </div>
 
-            {issue.assignee && (
+            {/* {issue.assignee && (
               <Avatar className='w-6 h-6'>
                 <AvatarImage src={issue.assignee.avatar} alt={issue.assignee.name} />
                 <AvatarFallback className='text-xs'>
@@ -118,7 +87,7 @@ export const BoardIssue: React.FC<BoardIssueProps> = ({
                     .join('')}
                 </AvatarFallback>
               </Avatar>
-            )}
+            )} */}
           </div>
         </div>
       )}

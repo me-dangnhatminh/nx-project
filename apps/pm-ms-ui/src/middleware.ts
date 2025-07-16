@@ -1,26 +1,25 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { authServices } from './lib/services/auth';
+import { cookies } from 'next/headers';
+import { verifyToken } from './lib/services/auth/auth-token';
 
 const protectedRoutes = ['/dashboard', '/projects', '/calendar', '/reports', '/settings'];
 const authRoutes = ['/signin', '/signup'];
 
 const authenticated = async (request: NextRequest) => {
+  const cookieStore = await cookies();
+
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get('auth-token')?.value;
+  const token = cookieStore.get('auth-token')?.value;
 
   const isAuthRoute = authRoutes.includes(pathname);
   const isProtectedRoute = protectedRoutes.some(
     (route) => pathname.startsWith(`${route}/`) || pathname === route,
   );
 
-  const removeAuthCookie = (response: NextResponse) => {
-    response.cookies.set({
-      name: 'auth-token',
-      value: '',
-      maxAge: 0,
-      path: '/',
-    });
+  const removeAuthCookie = async () => {
+    cookieStore.delete('auth-token');
+    cookieStore.delete('x-user-id');
   };
 
   const redirectToSignin = () => {
@@ -34,14 +33,14 @@ const authenticated = async (request: NextRequest) => {
   if (!token) {
     if (isAuthRoute) return NextResponse.next();
     if (isProtectedRoute) return redirectToSignin();
-    return NextResponse.next();
+    return redirectToSignin();
   }
 
   try {
-    const verified = await authServices.verifyToken(token);
+    const verified = await verifyToken(token);
     if (!verified) {
       const res = redirectToSignin();
-      removeAuthCookie(res);
+      removeAuthCookie();
       return res;
     }
 
@@ -60,7 +59,7 @@ const authenticated = async (request: NextRequest) => {
   } catch (err) {
     console.error('Auth middleware error:', err);
     const res = redirectToSignin();
-    removeAuthCookie(res);
+    removeAuthCookie();
     return res;
   }
 };

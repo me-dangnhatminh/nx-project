@@ -4,6 +4,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@shadcn-ui/components/checkbox';
 import Link from 'next/link';
 import { Project } from '@prisma/client';
+import { ProjectAction } from './project-action';
 
 export const projectColumns: ColumnDef<Project>[] = [
   {
@@ -59,6 +60,15 @@ export const projectColumns: ColumnDef<Project>[] = [
   {
     id: 'actions',
     header: 'Actions',
-    cell: ({ row }) => <>Action</>,
+    cell: ({ row }) => {
+      const projectId = row.original.id;
+      return (
+        <ProjectAction
+          projectId={projectId}
+          onEdit={() => console.log(`Edit project ${projectId}`)}
+          onDelete={() => console.log(`Delete project ${projectId}`)}
+        />
+      );
+    },
   },
 ];

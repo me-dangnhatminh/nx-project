@@ -1,220 +1,264 @@
-// // pnpm prisma db push --schema=apps/pm-ms-ui/src/prisma/schema.prisma --force-reset
+// pnpm prisma db push --schema=apps/pm-ms-ui/src/lib/prisma/schema.prisma --force-reset
 
-// generator client {
-//     provider = "prisma-client-js"
-// }
+generator client {
+    provider = "prisma-client-js"
+}
 
-// datasource db {
-//     provider = "postgresql"
-//     url      = "postgres://avnadmin:AVNS_9RN-e5v5pglX_B8YSAY@cmu-cs-447-dangnhatminh09032002-e210.b.aivencloud.com:20746/defaultdb?sslmode=require"
-// }
+datasource db {
+    provider = "postgresql"
+    url      = "postgres://avnadmin:AVNS_9RN-e5v5pglX_B8YSAY@cmu-cs-447-dangnhatminh09032002-e210.b.aivencloud.com:20746/defaultdb?sslmode=require"
+}
 
-// model User {
-//     id         String  @id @default(cuid())
-//     email      String  @unique
-//     name       String
-//     password   String
-//     avatar     String?
-//     role       Role    @default(MEMBER)
-//     department String?
+model ImageRef {
+    id       String @id @default(cuid())
+    fileName String
+    mimeType String
+    size     Int
+    imgOID   Int
 
-//     createdAt DateTime @default(now())
-//     updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-//     // Relations
-//     projectsLead   Project[]       @relation("ProjectLead")
-//     projectMembers ProjectMember[]
-//     issuesAssigned Issue[]         @relation("IssueAssignee")
-//     issuesReported Issue[]         @relation("IssueReporter")
-//     comments       Comment[]
-//     attachments    Attachment[]
+    // Relations
+    users User[] @relation("UserAvatar")
 
-//     @@map("users")
-// }
+    @@map("avatars")
+}
 
-// model Project {
-//     id          String        @id @default(cuid())
-//     name        String
-//     key         String        @unique
-//     description String?
-//     type        ProjectType   @default(SOFTWARE)
-//     category    String
-//     url         String?
-//     avatar      String?
-//     status      ProjectStatus @default(ACTIVE)
+model User {
+    id         String  @id @default(cuid())
+    email      String  @unique
+    credential String
+    firstName  String
+    lastName   String
+    avatarId   String?
 
-//     leadId String
-//     lead   User   @relation("ProjectLead", fields: [leadId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-//     createdAt DateTime  @default(now())
-//     updatedAt DateTime  @updatedAt
-//     removedAt DateTime?
+    // Relations
+    avatar         ImageRef?    @relation("UserAvatar", fields: [avatarId], references: [id])
+    memberships    Membership[] @relation("UserMemberships")
+    issuesCreated  Issue[]      @relation("IssueCreator")
+    issuesReported Issue[]      @relation("IssueReporter")
+    issuesAssigned Issue[]      @relation("IssueAssignee")
+    issuesArchived Issue[]      @relation("IssueArchivedBy")
 
-//     // Relations
-//     members ProjectMember[]
-//     issues  Issue[]
-//     sprints Sprint[]
+    @@map("users")
+}
 
-//     @@map("projects")
-// }
+model Group {
+    id          String  @id @default(cuid())
+    groupName   String
+    description String?
 
-// model ProjectMember {
-//     id String @id @default(cuid())
+    memberships Membership[] @relation("GroupMemberships")
 
-//     userId String
-//     user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    @@map("groups")
+}
 
-//     projectId String
-//     project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+model Membership {
+    id      String @id @default(cuid())
+    userId  String
+    groupId String
 
-//     role     Role     @default(MEMBER)
-//     joinedAt DateTime @default(now())
+    user  User  @relation("UserMemberships", fields: [userId], references: [id], onDelete: Cascade)
+    group Group @relation("GroupMemberships", fields: [groupId], references: [id], onDelete: Cascade)
 
-//     @@unique([userId, projectId])
-//     @@map("project_members")
-// }
+    @@map("memberships")
+}
 
-// model Issue {
-//     id          String      @id @default(cuid())
-//     key         String      @unique
-//     title       String
-//     description String?
-//     type        IssueType   @default(TASK)
-//     status      IssueStatus @default(TO_DO)
-//     priority    Priority    @default(MEDIUM)
+enum ActorType {
+    USER
+    // GROUP -- Chưa sử dụng
+}
 
-//     assigneeId String?
-//     assignee   User?   @relation("IssueAssignee", fields: [assigneeId], references: [id])
+model ProjectRoleActor {
+    id          String      @id @default(cuid())
+    projectId   String
+    projectRole ProjectRole
+    roleType    ActorType
+    roleParam   String // ID của user hoặc group
 
-//     reporterId String
-//     reporter   User   @relation("IssueReporter", fields: [reporterId], references: [id])
+    @@map("project_role_actors")
+}
 
-//     projectId String
-//     project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+enum ProjectRole {
+    ADMIN
+    MEMBER
+    VIEWER
+}
 
-//     sprintId String?
-//     sprint   Sprint? @relation(fields: [sprintId], references: [id])
+// ========================== Permissions =========================
+enum PermissionKey {
+    BROWSE_PROJECTS
+    ADMIN_PROJECTS
+    EDIT_ISSUES
+    CREATE_ISSUES
+    ASSIGN_ISSUES
+    RESOLVE_ISSUES
+}
 
-//     parentId String?
-//     parent   Issue?  @relation("IssueParent", fields: [parentId], references: [id])
-//     children Issue[] @relation("IssueParent")
+enum PermissionType {
+    PROJECT_ROLE
+    // USER
+    // GROUP
+}
 
-//     storyPoints   Int?
-//     estimatedTime Int? // in hours
-//     loggedTime    Int? // in hours
-//     dueDate       DateTime?
+model PermissionSchema {
+    id   String @id @default(cuid())
+    name String
 
-//     labels      String[]
-//     components  String[]
-//     fixVersions String[]
+    permissions SchemaPermission[]
+    projects    Project[]
 
-//     createdAt DateTime @default(now())
-//     updatedAt DateTime @updatedAt
+    @@map("permission_schemes")
+}
 
-//     // Relations
-//     comments    Comment[]
-//     attachments Attachment[]
+model SchemaPermission {
+    id         String         @id @default(cuid())
+    permission PermissionKey
+    permType   PermissionType
+    permParam  String // e.g user ID, group ID, project role ID
+    schemaId   String
 
-//     @@map("issues")
-// }
+    schema PermissionSchema @relation(fields: [schemaId], references: [id], onDelete: Cascade)
 
-// model Sprint {
-//     id        String       @id @default(cuid())
-//     name      String
-//     goal      String?
-//     startDate DateTime
-//     endDate   DateTime
-//     status    SprintStatus @default(PLANNED)
+    @@map("schema_permissions")
+}
 
-//     projectId String
-//     project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+// =========================================================
+enum ProjectType {
+    SOFTWARE
+    MARKETING
+    RESEARCH
+    DESIGN
+    OTHER
+}
 
-//     createdAt DateTime @default(now())
-//     updatedAt DateTime @updatedAt
+model Project {
+    id                 String      @id @default(cuid())
+    key                String
+    name               String
+    url                String?
+    leadId             String
+    description        String
+    type               ProjectType
+    avatarId           String?
+    permissionSchemaId String
 
-//     // Relations
-//     issues Issue[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-//     @@map("sprints")
-// }
+    // Relations
+    permissionSchema PermissionSchema @relation(fields: [permissionSchemaId], references: [id], onDelete: Cascade)
+    issues           Issue[]          @relation("ProjectIssues")
+    // lead    ProjectMember   @relation("ProjectLead", fields: [leadId], references: [id])
+    statuses         IssueStatus[]    @relation("ProjectIssueStatus")
+    types            IssueType[]      @relation("ProjectIssueType")
+    priorities       IssuePriority[]  @relation("ProjectIssuePriority")
 
-// model Comment {
-//     id      String @id @default(cuid())
-//     content String
+    @@map("projects")
+}
 
-//     authorId String
-//     author   User   @relation(fields: [authorId], references: [id])
+model Issue {
+    id           String  @id @default(cuid())
+    key          String
+    summary      String
+    description  String?
+    typeId       String
+    statusId     String
+    priorityId   String
+    resolutionId String?
+    projectId    String
+    creatorId    String
+    reporterId   String?
+    assigneeId   String?
 
-//     issueId String
-//     issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+    rank String // Lexorank for ordering issues, move outside in future
 
-//     createdAt DateTime @default(now())
-//     updatedAt DateTime @updatedAt
+    dueDate    DateTime?
+    resolvedAt DateTime?
+    archived   Boolean   @default(false)
+    archivedAt DateTime?
+    archivedBy String?
 
-//     @@map("comments")
-// }
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-// model Attachment {
-//     id   String @id @default(cuid())
-//     name String
-//     url  String
-//     size Int
-//     type String
+    // Relations
+    project      Project       @relation("ProjectIssues", fields: [projectId], references: [id])
+    creator      User          @relation("IssueCreator", fields: [creatorId], references: [id])
+    reporter     User?         @relation("IssueReporter", fields: [reporterId], references: [id])
+    assignee     User?         @relation("IssueAssignee", fields: [assigneeId], references: [id])
+    archivedUser User?         @relation("IssueArchivedBy", fields: [archivedBy], references: [id])
+    type         IssueType     @relation("IssueType", fields: [typeId], references: [id])
+    status       IssueStatus   @relation("IssueStatus", fields: [statusId], references: [id])
+    priority     IssuePriority @relation("IssuePriority", fields: [priorityId], references: [id])
+    resolution   Resolution?   @relation("Resolution", fields: [resolutionId], references: [id])
 
-//     uploadedById String
-//     uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+    @@map("issues")
+}
 
-//     issueId String
-//     issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+model IssueType {
+    id          String  @id @default(cuid())
+    sequence    Int     @default(0) // Used for ordering issue types
+    name        String
+    description String?
+    iconURL     String? // URL to an icon representing the issue type
+    avatarId    String?
 
-//     uploadedAt DateTime @default(now())
+    projectId String // optimize in the future
 
-//     @@map("attachments")
-// }
+    issue   Issue[] @relation("IssueType")
+    project Project @relation("ProjectIssueType", fields: [projectId], references: [id], onDelete: Cascade)
 
-// // Enums
-// enum Role {
-//     ADMIN
-//     MEMBER
-//     VIEWER
-// }
+    @@map("issue_types")
+}
 
-// enum ProjectType {
-//     SOFTWARE
-//     BUSINESS
-//     SERVICE_DESK
-// }
+model IssueStatus {
+    id          String  @id @default(cuid())
+    sequence    Int     @default(0)
+    name        String
+    description String?
+    iconURL     String?
+    color       String?
+    avatarId    String?
 
-// enum ProjectStatus {
-//     ACTIVE
-//     ARCHIVED
-// }
+    projectId String // optimize in the future
 
-// enum IssueType {
-//     TASK
-//     STORY
-//     BUG
-//     EPIC
-//     SUBTASK
-// }
+    issue   Issue[] @relation("IssueStatus")
+    project Project @relation("ProjectIssueStatus", fields: [projectId], references: [id], onDelete: Cascade)
 
-// enum IssueStatus {
-//     TO_DO
-//     IN_PROGRESS
-//     IN_REVIEW
-//     DONE
-// }
+    @@map("issue_statuses")
+}
 
-// enum Priority {
-//     HIGHEST
-//     HIGH
-//     MEDIUM
-//     LOW
-//     LOWEST
-// }
+model IssuePriority {
+    id          String  @id @default(cuid())
+    sequence    Int     @default(0)
+    name        String  @unique
+    description String?
+    iconURL     String?
+    color       String?
 
-// enum SprintStatus {
-//     PLANNED
-//     ACTIVE
-//     COMPLETED
-// }
+    projectId String
+
+    issue   Issue[] @relation("IssuePriority")
+    project Project @relation("ProjectIssuePriority", fields: [projectId], references: [id], onDelete: Cascade)
+
+    @@map("priorities")
+}
+
+model Resolution {
+    id          String  @id @default(cuid())
+    sequence    Int     @default(0) // Used for ordering resolutions
+    name        String  @unique
+    description String?
+    iconURL     String? // URL to an icon representing the resolution
+
+    issue Issue[] @relation("Resolution")
+
+    @@map("resolutions")
+}
+
+// Chuyển qua thuật toán Lexorank để tối ưu sắp xếp

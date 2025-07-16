@@ -23,7 +23,7 @@
       "@shared/types/*": ["libs/shared/types/src/*"],
       "@shared/utils": ["libs/shared/utils/src/index.ts"],
       "@shared/utils/*": ["libs/shared/utils/src/*"],
-      "@pm-ms-ui/*": ["apps/pm-ms-ui/src/*"]
+      "apps/pm-ms-ui/src/*": ["apps/pm-ms-ui/src/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

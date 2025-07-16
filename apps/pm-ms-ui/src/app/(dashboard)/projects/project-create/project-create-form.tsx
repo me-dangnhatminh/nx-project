@@ -15,11 +15,6 @@ import {
 } from '@shadcn-ui/components/dialog';
 import { cn } from '@shared/utils';
 import { ChangeIconForm } from './change-icon-form';
-import {
-  projectApi,
-  ProjectCreateInput,
-  ProjectCreateSchema,
-} from 'apps/pm-ms-ui/src/lib/api/v2.project';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import {
@@ -33,7 +28,10 @@ import {
 import { Input } from '@shadcn-ui/components/input';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useMe } from '@pm-ms-ui/hooks/use-user';
+
+import { useMe } from 'apps/pm-ms-ui/src/hooks/use-user';
+import { CreateProjectInput, CreateProjectSchema } from 'apps/pm-ms-ui/src/lib/schemas/project';
+import { projectApi } from 'apps/pm-ms-ui/src/lib/api/project';
 
 // TODO: move to utils
 function base64ToImgFile(base64: string, filename: string, defaultMimeType = 'image/jpeg'): File {
@@ -52,30 +50,21 @@ export function ProjectCreateForm() {
   const [changeIconDialogOpen, setChangeIconDialogOpen] = useState(false);
 
   const createProjectMutation = useMutation({
-    mutationFn: projectApi.create,
-    onSuccess: (data) => {
-      toast.success('Creating project...', {
-        description: 'Please wait while we create your project.',
-        duration: 2000,
+    mutationFn: async (input: CreateProjectInput) => {
+      return toast.promise(projectApi.create(input), {
+        loading: 'Creating project...',
+        success: 'Project created successfully',
+        error: (error: any) => {
+          console.error('Project creation error:', error);
+          return error?.message || 'Failed to create project';
+        },
       });
-    },
-    onError: (error) => {
-      console.error('Error creating project:', error);
-      // Handle error, e.g., show an error message
     },
   });
 
-  const form = useForm<ProjectCreateInput>({
-    resolver: zodResolver(ProjectCreateSchema),
-    defaultValues: {
-      name: '',
-      key: '',
-      type: 'business',
-      category: 'demo',
-      description: undefined,
-      url: undefined,
-      avatar: undefined,
-    },
+  const form = useForm<CreateProjectInput>({
+    resolver: zodResolver(CreateProjectSchema),
+    defaultValues: { name: '', key: '', type: 'SOFTWARE' },
   });
 
   useEffect(() => {
@@ -89,8 +78,7 @@ export function ProjectCreateForm() {
     form.setValue('avatar', file);
   }, []);
 
-  const onSubmit = useCallback(async (data: ProjectCreateInput) => {
-    console.log('Form data:', data);
+  const onSubmit = useCallback(async (data: CreateProjectInput) => {
     createProjectMutation.mutate(data);
   }, []);
 
@@ -213,9 +201,11 @@ export function ProjectCreateForm() {
                     className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
                     {...field}
                   >
-                    <option value='business'>Business</option>
-                    <option value='personal'>Personal</option>
-                    <option value='research'>Research</option>
+                    <option value='SOFTWARE'>Software</option>
+                    <option value='MARKETING'>Marketing</option>
+                    <option value='RESEARCH'>Research</option>
+                    <option value='DESIGN'>Design</option>
+                    <option value='OTHER'>Other</option>
                   </select>
                 </FormControl>
                 <FormMessage />

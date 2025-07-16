@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { projectsApi } from '../../../lib/api/projects';
+import { projectApi } from 'apps/pm-ms-ui/src/lib/api/project';
 import { Button } from '@shadcn-ui/components/button';
 import {
   Form,
@@ -104,7 +104,7 @@ export default function EditProjectForm({ project, onSuccess, onCancel }: EditPr
 
       console.log('Clean data being sent to API:', cleanData);
 
-      const response = await projectsApi.updateProject(project.id, cleanData);
+      const response = await projectApi.updateProject(project.id, cleanData);
 
       console.log('API Response:', response);
 

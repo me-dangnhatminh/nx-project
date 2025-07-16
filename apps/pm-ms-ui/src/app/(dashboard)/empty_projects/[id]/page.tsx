@@ -41,7 +41,7 @@ import {
   SheetTrigger,
 } from '@shadcn-ui/components/sheet';
 import { Project, User } from '@shared/types/pmms';
-import { projectsApi } from '../../../../lib/api/projects';
+import { projectsApi } from '../apps/pm-ms-ui/src/lib/api/project';
 import EditProjectForm from '../edit-project-form';
 import DeleteConfirmationDialog from '../delete-confirmation-dialog';
 import { toast } from 'sonner';

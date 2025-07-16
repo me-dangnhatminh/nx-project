@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { projectsApi } from '../../../lib/api/projects';
 import { Button } from '@shadcn-ui/components/button';
 import {
   Form,
@@ -24,37 +22,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@shadcn-ui/components/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@shadcn-ui/components/card';
-import { Loader2, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
-
-// Form schema - using lowercase values for form but will convert to uppercase for API
-const CreateProjectSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Project name is required')
-    .max(100, 'Project name must be less than 100 characters'),
-  key: z
-    .string()
-    .min(1, 'Project key is required')
-    .max(20, 'Project key must be less than 20 characters')
-    .regex(
-      /^[A-Z0-9_-]+$/,
-      'Project key must contain only uppercase letters, numbers, underscores, and hyphens',
-    ),
-  description: z.string().optional(),
-  type: z.enum(['software', 'business', 'service_desk'], {
-    message: 'Project type must be one of: software, business, service_desk',
-  }),
-  category: z
-    .string()
-    .min(1, 'Project category is required')
-    .max(50, 'Project category must be less than 50 characters'),
-  url: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
-  avatar: z.string().url('Please enter a valid avatar URL').optional().or(z.literal('')),
-});
-
-type CreateProjectFormData = z.infer<typeof CreateProjectSchema>;
+import { Card, CardContent } from '@shadcn-ui/components/card';
+import { Loader2, Plus, X } from 'lucide-react';
+import { projectsApi } from 'apps/pm-ms-ui/src/lib/api/projects';
+import { CreateProjectInput, CreateProjectSchema } from 'apps/pm-ms-ui/src/lib/schemas/project';
 
 interface CreateProjectFormProps {
   onSuccess?: (project: any) => void;
@@ -64,7 +36,7 @@ interface CreateProjectFormProps {
 export default function CreateProjectForm({ onSuccess, onCancel }: CreateProjectFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<CreateProjectFormData>({
+  const form = useForm<CreateProjectInput>({
     resolver: zodResolver(CreateProjectSchema),
     defaultValues: {
       name: '',
@@ -90,7 +62,7 @@ export default function CreateProjectForm({ onSuccess, onCancel }: CreateProject
     }
   };
 
-  const onSubmit = async (data: CreateProjectFormData) => {
+  const onSubmit = async (data: CreateProjectInput) => {
     setIsSubmitting(true);
 
     try {
@@ -118,18 +90,11 @@ export default function CreateProjectForm({ onSuccess, onCancel }: CreateProject
       toast.success('Project created successfully!');
     } catch (error) {
       console.error('Error creating project:', error);
-
-      if (error.response?.data?.error === 'Validation error') {
-        const details = error.response.data.details;
-        const errorMessages = details
-          .map((detail) => `${detail.path.join('.')}: ${detail.message}`)
-          .join(', ');
-        toast.error(`Validation Error: ${errorMessages}`);
-      } else if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error('Failed to create project');
-      }
+      const errMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast.error(errMsg, {
+        description: 'Please try again or contact support if the issue persists.',
+        duration: 2000,
+      });
     } finally {
       setIsSubmitting(false);
     }

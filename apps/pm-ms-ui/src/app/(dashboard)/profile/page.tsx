@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from '@shadcn-ui/components/select';
 import { toast } from 'sonner';
-import { projectsApi } from '../../../lib/api/projects';
+import { projectsApi } from 'apps/pm-ms-ui/src/lib/api/project';
 
 // Current user data based on login
 const currentUser = {

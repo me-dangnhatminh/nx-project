@@ -24,12 +24,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@shadcn-ui/components/form';
-import { SignUpSchema, type SignUpFormData } from '@shared/types/pmms';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { authApi } from 'apps/pm-ms-ui/src/lib/api/auth';
+import { SignUpSchema, type SignUpInput } from 'apps/pm-ms-ui/src/lib/schemas/auth';
 
 export function SignUpForm() {
   const router = useRouter();
@@ -58,7 +58,7 @@ export function SignUpForm() {
     },
   });
 
-  const form = useForm<SignUpFormData>({
+  const form = useForm<SignUpInput>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
       firstName: '',
@@ -69,7 +69,7 @@ export function SignUpForm() {
     },
   });
 
-  async function onSubmit(data: SignUpFormData) {
+  async function onSubmit(data: SignUpInput) {
     await signUpMutation.mutateAsync(data);
   }
 

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authServices } from 'apps/pm-ms-ui/src/lib/services/auth';
+import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
   try {
-    await authServices.removeAuthCookie();
+    const cookieStore = await cookies();
+    cookieStore.delete('auth-token');
+    cookieStore.delete('x-user-id');
     return NextResponse.json({ message: 'Signed out successfully' }, { status: 200 });
   } catch (error) {
     console.error('Sign out error:', error);

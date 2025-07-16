@@ -27,16 +27,17 @@ import {
   FormLabel,
   FormMessage,
 } from '@shadcn-ui/components/form';
-import { SignInSchema, type SignInFormData } from '@shared/types/pmms';
+// import { SignInSchema, type SignInFormData } from '@shared/types/pmms';
 import { useMutation } from '@tanstack/react-query';
 import { authApi } from 'apps/pm-ms-ui/src/lib/api/auth';
+import { SignInSchema, type SignInInput } from 'apps/pm-ms-ui/src/lib/schemas/auth';
 
 export function SignInForm() {
   const router = useRouter();
 
   const signInMutation = useMutation({
-    mutationFn: async (data: SignInFormData) => {
-      const response = await authApi.signIn(data);
+    mutationFn: async (input: SignInInput) => {
+      const response = await authApi.signIn(input);
       return response.data;
     },
     onSuccess: (data) => {
@@ -52,12 +53,12 @@ export function SignInForm() {
     },
   });
 
-  const form = useForm<SignInFormData>({
+  const form = useForm<SignInInput>({
     resolver: zodResolver(SignInSchema),
     defaultValues: { email: '', password: '' },
   });
 
-  async function onSubmit(data: SignInFormData) {
+  async function onSubmit(data: SignInInput) {
     await signInMutation.mutateAsync(data);
   }
 
