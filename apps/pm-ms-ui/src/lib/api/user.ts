@@ -1,8 +1,10 @@
 import { axiosInstance } from './_base';
+import { User } from 'apps/pm-ms-ui/src/lib/types';
 
 const getMe = async () => {
   const response = await axiosInstance.get('/users/me');
-  return response.data;
+  const data = response.data?.data || response.data;
+  return data as User;
 };
 
 const searchUser = async (text: string) => {

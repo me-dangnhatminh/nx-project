@@ -1,0 +1,35 @@
+'use client';
+
+import Link from 'next/link';
+
+export function ProjectContainer(props: { projectId: string }) {
+  const { projectId } = props;
+  return (
+    <section className='w-full h-full'>
+      <div
+        id='project-detail-header'
+        className='w-full h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 bg-white border-b border-gray-200'
+      >
+        <h1 className='block text-2xl font-bold tracking-wide'>Project Detail</h1>
+      </div>
+
+      <div id='project-detail-content' className='p-4 sm:p-6 lg:p-8 flex flex-row gap-4'>
+        <Link href={`/projects/${projectId}/summary`} className='text-blue-500 hover:underline'>
+          Summary
+        </Link>
+
+        <Link href={`/projects/${projectId}/board`} className='text-blue-500 hover:underline'>
+          Board
+        </Link>
+
+        <Link href={`/projects/${projectId}/list`} className='text-blue-500 hover:underline'>
+          List
+        </Link>
+
+        <Link href={`/projects/${projectId}/calendar`} className='text-blue-500 hover:underline'>
+          Calendar
+        </Link>
+      </div>
+    </section>
+  );
+}

@@ -1,8 +1,8 @@
 import { prisma } from 'apps/pm-ms-ui/src/lib/prisma';
-import { CreateStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/status';
+import { CreateIssueStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/status';
 
 export default async function statusCreate(
-  input: CreateStatusInput,
+  input: CreateIssueStatusInput,
   context: { userId: string; projectId: string },
 ): Promise<void> {
   return await prisma.$transaction(

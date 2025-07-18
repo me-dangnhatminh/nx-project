@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
 import { statusApi } from 'apps/pm-ms-ui/src/lib/api/status';
-import { CreateStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/status';
+import { CreateIssueStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/status';
+import { create } from 'zustand';
 
 export type IssueStatus = {
   id: string;
@@ -12,26 +12,39 @@ export type IssueStatus = {
   projectId: string;
 };
 
-export type StatusStore = {
+type SetStatuses = React.Dispatch<React.SetStateAction<IssueStatus[]>>;
+type StatusStore = {
   statuses: IssueStatus[];
-  setStatuses: (statuses: IssueStatus[]) => void;
-  addStatus: (status: IssueStatus) => void;
-  updateStatus: (status: IssueStatus) => void;
-  sortedStatuses: () => IssueStatus[];
-  deleteStatus: (statusId: string) => void;
-  reorder: (sources: number[], destination: number) => void;
+  setStatuses: SetStatuses;
 };
 
-export const useProjectStatus = (projectId: string) => {
-  const [statuses, setStatuses] = useState<IssueStatus[]>([]);
+const useStatusStore = create<StatusStore>((set) => ({
+  statuses: [],
+  setStatuses: (update) => {
+    if (typeof update === 'function') set((state) => ({ statuses: update(state.statuses) }));
+    else set({ statuses: update });
+  },
+}));
+
+export const useProjectStatus = (statusId: string) => {
+  throw new Error('useProjectStatus is not implemented yet');
+};
+
+export const useProjectStatuses = (projectId: string) => {
+  const statuses = useStatusStore((state) => state.statuses);
+  const setStatuses = useStatusStore((state) => state.setStatuses);
 
   const fetchStatuses = useQuery({
     queryKey: [projectId, 'statuses'],
-    queryFn: async () => statusApi.list(projectId),
+    queryFn: async () => {
+      const data = await statusApi.list(projectId);
+      setStatuses(data.items);
+      return data;
+    },
   });
 
   const createStatus = useMutation({
-    mutationFn: (statusData: CreateStatusInput) => {
+    mutationFn: (statusData: CreateIssueStatusInput) => {
       return statusApi.create(projectId, statusData);
     },
     onSuccess: () => {
@@ -40,18 +53,21 @@ export const useProjectStatus = (projectId: string) => {
   });
 
   const reorderStatus = useMutation({
-    mutationFn: (input: { status: { id: string; sequence: number } }) => {
-      return statusApi.reorder(projectId, input);
+    mutationFn: (input: { statusId: string; sequence: number }) => {
+      return statusApi.update(projectId, input.statusId, { sequence: input.sequence });
     },
     onMutate: (input) => {
       const previous = structuredClone(statuses);
       const newStatuses = structuredClone(statuses);
-      const index = newStatuses.findIndex((s) => s.id === input.status.id);
+      const index = newStatuses.findIndex((s) => s.id === input.statusId);
       if (index === -1) throw new Error('Status not found for reordering');
       const data = newStatuses[index];
       if (!data) throw new Error('Status data not found for reordering');
       newStatuses.splice(index, 1);
-      newStatuses.splice(input.status.sequence - 1, 0, data);
+      newStatuses.splice(input.sequence - 1, 0, data);
+      newStatuses.forEach((status, idx) => (status.sequence = idx + 1));
+      console.log('old: ', previous);
+      console.log('new: ', newStatuses);
       setStatuses(newStatuses);
       return { previousStatuses: previous };
     },
@@ -82,12 +98,6 @@ export const useProjectStatus = (projectId: string) => {
     },
   });
 
-  useEffect(() => {
-    if (fetchStatuses.isSuccess && fetchStatuses.data) {
-      setStatuses(fetchStatuses.data.items);
-    }
-  }, [fetchStatuses.data, fetchStatuses.isSuccess, setStatuses]);
-
   return {
     statuses,
     fetchStatuses,
@@ -97,31 +107,3 @@ export const useProjectStatus = (projectId: string) => {
     renameStatus,
   };
 };
-
-// const renameStatus = useMutation({
-//   mutationFn: async ({ columnId, name }: { columnId: string; name: string }) => {
-//     return statusApi.update(projectId, columnId, { name });
-//   },
-//   onSuccess: (_data, { columnId, name }) => {
-//     onColumnRename?.(columnId, name);
-//     setColumnAction(null);
-//   },
-//   onError: (error) => {
-//     toast.error(`Failed to rename column: ${error.message}`);
-//     setColumnAction(null);
-//   },
-// });
-
-// const deleteStatus = useMutation({
-//   mutationFn: async (columnId: string) => {
-//     return statusApi.delete(projectId, columnId);
-//   },
-//   onSuccess: () => {
-//     onColumnDelete?.(column.id);
-//     setColumnAction(null);
-//   },
-//   onError: (error) => {
-//     toast.error(`Failed to delete column: ${error.message}`);
-//     setColumnAction(null);
-//   },
-// });

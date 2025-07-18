@@ -3,8 +3,8 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@shadcn-ui/components/checkbox';
 import Link from 'next/link';
-import { Project } from '@prisma/client';
 import { ProjectAction } from './project-action';
+import { Project } from 'apps/pm-ms-ui/src/lib/types';
 
 export const projectColumns: ColumnDef<Project>[] = [
   {

@@ -29,7 +29,7 @@ import { Input } from '@shadcn-ui/components/input';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { useMe } from 'apps/pm-ms-ui/src/hooks/use-user';
+import { useUser } from 'apps/pm-ms-ui/src/hooks/use-user';
 import { CreateProjectInput, CreateProjectSchema } from 'apps/pm-ms-ui/src/lib/schemas/project';
 import { projectApi } from 'apps/pm-ms-ui/src/lib/api/project';
 
@@ -45,7 +45,7 @@ function base64ToImgFile(base64: string, filename: string, defaultMimeType = 'im
 }
 
 export function ProjectCreateForm() {
-  const getMe = useMe(true);
+  const { fetchMe } = useUser(true);
   const [icon, setIcon] = useState<string | null>(null);
   const [changeIconDialogOpen, setChangeIconDialogOpen] = useState(false);
 
@@ -68,8 +68,8 @@ export function ProjectCreateForm() {
   });
 
   useEffect(() => {
-    if (getMe.data) form.setValue('leadId', getMe.data.id);
-  }, [getMe.data, form]);
+    if (fetchMe.data) form.setValue('leadId', fetchMe.data.id);
+  }, [fetchMe.data, form]);
 
   const handleIconChange = useCallback((newicon: string) => {
     if (!newicon) throw new Error('Icon cannot be null');

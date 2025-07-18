@@ -1,5 +1,5 @@
-import PageClient from './page-client';
+import { PageContainer } from './page-container';
 
-export default function Index() {
-  return <PageClient />;
+export default function Page() {
+  return <PageContainer />;
 }

@@ -61,3 +61,19 @@ export async function DELETE(req: NextRequest, context: Context) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function PATCH(req: NextRequest, context: Context) {
+  try {
+    const cookie = await cookies();
+    const userId = cookie.get('x-user-id')?.value;
+    if (!userId) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
+
+    const { id: projectId } = await context.params;
+    if (!projectId) return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('PATCH /api/statuses error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}

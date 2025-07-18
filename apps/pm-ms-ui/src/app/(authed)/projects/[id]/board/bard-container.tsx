@@ -1,7 +1,7 @@
 'use client';
 
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd';
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Loader2, Plus } from 'lucide-react';
 import {
   Dialog,
@@ -18,24 +18,28 @@ import { Label } from '@shadcn-ui/components/label';
 
 import BoardColumn from './board-column';
 import { cn } from '@shared/utils';
-import { CreateStatusInput, CreateStatusSchema } from 'apps/pm-ms-ui/src/lib/schemas/status';
+import {
+  CreateIssueStatusInput,
+  CreateIssueStatusSchema,
+} from 'apps/pm-ms-ui/src/lib/schemas/status';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form } from '@shadcn-ui/components/form';
 import { toast } from 'sonner';
-import { useProjectStatus } from 'apps/pm-ms-ui/src/hooks/use-status';
+import { useProjectStatuses } from 'apps/pm-ms-ui/src/hooks/use-status';
+import { useProjectIssues } from 'apps/pm-ms-ui/src/hooks/use-issue';
 
 const CreateStatusDialog: React.FC<{
-  onCreateStatus: (statusData: CreateStatusInput) => Promise<void>;
+  onCreateStatus: (statusData: CreateIssueStatusInput) => Promise<void>;
 }> = ({ onCreateStatus }) => {
   const [open, setOpen] = useState(false);
 
-  const form = useForm<CreateStatusInput>({
-    resolver: zodResolver(CreateStatusSchema),
+  const form = useForm<CreateIssueStatusInput>({
+    resolver: zodResolver(CreateIssueStatusSchema),
     defaultValues: { name: '', description: '', color: '#6B7280', sequence: 0 },
   });
 
-  const handleSubmit = useCallback(async (data: CreateStatusInput) => {
+  const handleSubmit = useCallback(async (data: CreateIssueStatusInput) => {
     try {
       await onCreateStatus(data);
       form.reset();
@@ -132,7 +136,8 @@ const CreateStatusDialog: React.FC<{
 };
 
 const BoardContainer: React.FC<{ projectId: string }> = ({ projectId }) => {
-  const { statuses, fetchStatuses, createStatus, reorderStatus } = useProjectStatus(projectId);
+  const { statuses, fetchStatuses, createStatus, reorderStatus } = useProjectStatuses(projectId);
+  const { issues, setIssues } = useProjectIssues(projectId, {}, { enabled: false }); // all issues
 
   const handleDragEnd = useCallback(
     async (result: DropResult) => {
@@ -144,8 +149,9 @@ const BoardContainer: React.FC<{ projectId: string }> = ({ projectId }) => {
       if (isSameLocation && isSameIndex) return;
 
       if (type === 'column') {
+        const sequence = destination.index + 1;
         reorderStatus.mutate(
-          { status: { id: draggableId, sequence: destination.index + 1 } },
+          { statusId: draggableId, sequence },
           {
             onSuccess: () => toast.success('Status reordered successfully'),
             onError: () => toast.error('Failed to reorder status'),
@@ -154,14 +160,58 @@ const BoardContainer: React.FC<{ projectId: string }> = ({ projectId }) => {
       }
 
       if (type === 'issue') {
-        const destStatus = statuses.find((col) => col.id === destination.droppableId);
-        const sourceIssueId = draggableId;
-        const destIssueInx = destination.index;
+        const sourceColumnId = source.droppableId;
+        const destinationColumnId = destination.droppableId;
 
-        // get before and affter issues in the destination column
+        const sourceColumn = statuses.find((s) => s.id === sourceColumnId);
+        const destinationColumn = statuses.find((s) => s.id === destinationColumnId);
+
+        if (!sourceColumn || !destinationColumn) {
+          toast.error('Source or destination column not found');
+          return;
+        }
+
+        const sourceIssues = issues.filter((issue) => issue.statusId === sourceColumn.id);
+        const destinationIssues = issues.filter((issue) => issue.statusId === destinationColumn.id);
+
+        const movedIssue = sourceIssues[source.index];
+        if (!movedIssue) {
+          toast.error('Issue not found in source column');
+          return;
+        }
+
+        // Nếu cùng column (reorder trong column)
+        if (sourceColumnId === destinationColumnId) {
+          const newOrder = Array.from(sourceIssues);
+          const [removed] = newOrder.splice(source.index, 1);
+          newOrder.splice(destination.index, 0, removed);
+
+          // Update lại toàn bộ sequence cho column đó
+          const updatedIssues = issues.map((issue) => {
+            if (issue.statusId !== sourceColumnId) return issue;
+            const idx = newOrder.findIndex((i) => i.id === issue.id);
+            return { ...issue, sequence: idx + 1 }; // FIXME: missig isues sequence
+          });
+
+          setIssues(updatedIssues);
+          return;
+        }
+
+        // Nếu di chuyển sang column khác
+        const newIssue = {
+          ...movedIssue,
+          statusId: destinationColumnId,
+          sequence: destinationIssues.length + 1,
+        };
+
+        const updatedIssues = issues.map((issue) =>
+          issue.id === movedIssue.id ? newIssue : issue,
+        );
+
+        setIssues(updatedIssues);
       }
     },
-    [statuses, reorderStatus],
+    [statuses, reorderStatus, projectId],
   );
 
   if (fetchStatuses.isPending) {

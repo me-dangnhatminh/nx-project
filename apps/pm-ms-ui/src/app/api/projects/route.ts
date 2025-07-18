@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { projectCreate, projectDelete, projectList } from 'apps/pm-ms-ui/src/lib/services/project';
+import { projectCreate, projectList } from 'apps/pm-ms-ui/src/lib/services/project';
 import { CreateProjectSchema } from 'apps/pm-ms-ui/src/lib/schemas/project';
 import z from 'zod';
 
@@ -23,7 +23,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/projects - List projects
 export async function GET(request: NextRequest) {
   try {
     const userId = request.cookies.get('x-user-id')?.value;

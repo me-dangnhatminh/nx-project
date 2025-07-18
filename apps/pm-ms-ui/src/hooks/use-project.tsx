@@ -1,63 +1,65 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { create } from 'zustand';
+import { useQuery } from '@tanstack/react-query';
 import { projectApi } from 'apps/pm-ms-ui/src/lib/api/project';
-import { statusApi } from 'apps/pm-ms-ui/src/lib/api/status';
+import { Project, User } from 'apps/pm-ms-ui/src/lib/types';
 
-export const useFetchProjects = () => {
-  return useQuery({
+type SetProjects = React.Dispatch<React.SetStateAction<Project[]>>;
+const useProjectStore = create<{
+  projects: Project[];
+  setProjects: SetProjects;
+}>((set) => ({
+  projects: [],
+  setProjects: (update: Project[] | ((prev: Project[]) => Project[])) => {
+    if (typeof update === 'function') set((state) => ({ projects: update(state.projects) }));
+    else set({ projects: update });
+  },
+}));
+
+export const useProject = (projectId: string) => {
+  const [project, setProject] = useState<Project>();
+  const fetchProject = useQuery({
+    queryKey: ['project'],
+    queryFn: async () => {
+      const data = await projectApi.get(projectId);
+      setProject(data);
+      return data;
+    },
+  });
+
+  return { project, setProject, fetchProject };
+};
+
+export const useProjects = () => {
+  const { projects, setProjects } = useProjectStore();
+
+  const fetchProjects = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      return await projectApi.list();
+      const data = await projectApi.list();
+      setProjects(data.items || []);
+      return data;
     },
-    staleTime: 1000 * 60 * 5,
   });
+
+  return { projects, setProjects, fetchProjects };
 };
 
-export const useFetchProjectDetail = (
-  id: string,
-  viewType: 'summary' | 'board' | 'list' = 'summary',
-) => {
-  return useQuery({
-    queryKey: ['projects', id],
+export const useProjectMembers = (projectId: string) => {
+  const [members, setMembers] = useState<User[]>([]);
+
+  const fetchMembers = useQuery({
+    queryKey: [projectId, 'members'],
     queryFn: async () => {
-      return await projectApi.get(id);
+      const data = await projectApi.memberList(projectId);
+      setMembers(data.items || []);
+      return data;
     },
-    staleTime: 1000 * 60 * 5,
   });
-};
 
-export const useFetchProjectStatuses = (projectId: string) => {
-  return useQuery({
-    queryKey: ['projects', projectId, 'statuses'],
-    queryFn: async () => statusApi.list(projectId),
-  });
-};
-
-export const useReorderProjectStatuses = (projectId: string) => {
-  return useMutation({
-    mutationKey: ['projects', projectId, 'reorder-statuses'],
-    mutationFn: (input: Parameters<typeof statusApi.reorder>[1]) => {
-      return statusApi.reorder(projectId, input);
-    },
-    onSuccess: () => {},
-  });
-};
-
-export const useFetchProjectTypes = (projectId: string) => {
-  return useQuery({
-    queryKey: ['projects', projectId, 'types'],
-    queryFn: async () => {
-      return [];
-    },
-    staleTime: 1000 * 60 * 5,
-  });
-};
-
-export const useFetchProjectMembers = (projectId: string) => {
-  return useQuery({
-    queryKey: ['projects', projectId, 'members'],
-    queryFn: async () => {
-      return [];
-    },
-    staleTime: 1000 * 60 * 5,
-  });
+  return {
+    members,
+    setMembers,
+    fetchMembers,
+  };
 };

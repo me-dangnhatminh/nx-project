@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from 'apps/pm-ms-ui/src/lib/prisma';
+
 import { projectDelete } from 'apps/pm-ms-ui/src/lib/services/project';
 
-interface RouteParams {
-  params: Promise<{ id: string }>;
+type Context = { params: Promise<{ id: string }> };
+export async function GET(request: NextRequest, { params }: Context) {
+  try {
+    const { id: projectId } = await params;
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    return NextResponse.json(project);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: 'Failed to fetch project' }, { status: 500 });
+  }
 }
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+
+export async function DELETE(request: NextRequest, { params }: Context) {
   try {
     const userId = request.cookies.get('x-user-id')?.value;
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

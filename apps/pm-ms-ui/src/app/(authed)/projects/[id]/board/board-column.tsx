@@ -36,8 +36,8 @@ import BoardColumnActions from './board-column-actions';
 import { toast } from 'sonner';
 import { CreateIssueInput, CreateIssueSchema } from 'apps/pm-ms-ui/src/lib/schemas/issue';
 import { Form } from '@shadcn-ui/components/form';
-import { useProjectIssue } from 'apps/pm-ms-ui/src/hooks/use-issue';
-import { useProjectStatus } from 'apps/pm-ms-ui/src/hooks/use-status';
+import { useProjectIssues } from 'apps/pm-ms-ui/src/hooks/use-issue';
+import { useProjectStatuses } from 'apps/pm-ms-ui/src/hooks/use-status';
 import { Issue, IssueStatus, User } from 'apps/pm-ms-ui/src/lib/types';
 
 interface AssigneeSelectProps {
@@ -102,7 +102,7 @@ const CreateIssueForm: React.FC<{
   columnId: string;
   projectId: string;
 }> = ({ onSubmit, onCancel, columnId, projectId }) => {
-  const { createIssue } = useProjectIssue(projectId, { statusId: columnId });
+  const { createIssue } = useProjectIssues(projectId, { statusId: columnId });
 
   const generateIssueKey = useCallback(() => {
     const timestamp = Date.now();
@@ -271,8 +271,8 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
   onColumnRename,
   onColumnDelete,
 }) => {
-  const { deleteStatus, renameStatus } = useProjectStatus(projectId);
-  const { issues } = useProjectIssue(projectId, { statusId: column.id });
+  const { deleteStatus, renameStatus } = useProjectStatuses(projectId);
+  const { issues } = useProjectIssues(projectId, { statusId: column.id });
 
   const [columnAction, setColumnAction] = useState<'rename' | 'delete' | null>(null);
 

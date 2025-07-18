@@ -17,7 +17,7 @@ import { Menu } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { useMe } from 'apps/pm-ms-ui/src/hooks/use-user';
+import { useUser } from 'apps/pm-ms-ui/src/hooks/use-user';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -26,7 +26,7 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const router = useRouter();
-  const getMe = useMe(true);
+  const { fetchMe } = useUser(true);
 
   const handleSignOut = useCallback(async () => {
     try {
@@ -106,7 +106,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent className='w-56' align='end'>
             <DropdownMenuLabel>
-              {getMe.data ? `${getMe.data.firstName} ${getMe.data.lastName}` : 'User'}
+              {fetchMe.data ? `${fetchMe.data.firstName} ${fetchMe.data.lastName}` : 'User'}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem

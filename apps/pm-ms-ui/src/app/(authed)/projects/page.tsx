@@ -1,20 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Project } from '@prisma/client';
 import { Button } from '@shadcn-ui/components/button';
 import { cn } from '@shared/utils';
 import { DataTable } from './project-table/data-table';
 import { projectColumns } from './project-table/project-column';
-import { useFetchProjects } from 'apps/pm-ms-ui/src/hooks/use-project';
+import { useProjects } from 'apps/pm-ms-ui/src/hooks/use-project';
 import { ProjectCreateForm } from './project-create/project-create-form';
 
 export default function ProjectsPage() {
-  const fetchProjects = useFetchProjects();
+  const { projects, fetchProjects } = useProjects();
+
   const [isCreatePanelOpen, setIsCreatePanelOpen] = useState(false);
   if (fetchProjects.isPending) return <div>Loading...</div>;
-
-  const projects = fetchProjects.data?.items || ([] as Project[]);
 
   return (
     <section className={cn('w-full h-full', 'relative')}>

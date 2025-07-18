@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { UpdateStatusSchema } from 'apps/pm-ms-ui/src/lib/schemas/status';
+import { UpdateIssueStatusSchema } from 'apps/pm-ms-ui/src/lib/schemas/status';
 import { statusDelete, statusUpdate } from 'apps/pm-ms-ui/src/lib/services/status';
 import { cookies } from 'next/headers';
 import z from 'zod';
@@ -14,7 +14,7 @@ export async function PATCH(
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const valid = UpdateStatusSchema.parse(body);
+    const valid = UpdateIssueStatusSchema.parse(body);
     const { id: projectId, statusId } = await params;
 
     await statusUpdate(valid, { requesterId: 'system', statusId });

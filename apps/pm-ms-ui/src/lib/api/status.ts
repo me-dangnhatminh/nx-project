@@ -1,3 +1,4 @@
+import { UpdateIssueStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/status';
 import { axiosInstance } from './_base';
 
 type IssueRes = {
@@ -39,17 +40,12 @@ const reorderStatuses = async (
   return response.data?.data || response.data;
 };
 
-const updateStatus = async (
-  projectId: string,
-  statusId: string,
-  statusData: { name?: string; description?: string; color?: string; sequence?: number },
-) => {
-  const response = await axiosInstance.patch(
-    `/projects/${projectId}/statuses/${statusId}`,
-    statusData,
-  );
+const updateStatus = async (projectId: string, statusId: string, input: UpdateIssueStatusInput) => {
+  const url = `/projects/${projectId}/statuses/${statusId}`;
+  const response = await axiosInstance.patch(url, input);
   return response.data?.data || response.data;
 };
+
 export const statusApi = {
   list: listStatuses,
   create: createStatus,

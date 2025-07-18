@@ -29,9 +29,9 @@ export function ProjectAction(props: {
   const { projectId } = props;
   const [openAssignDialog, setOpenAssignDialog] = useState(false);
 
-  const inviteUserMutation = useMutation({
-    mutationFn: async (param: Parameters<typeof projectApi.inviteUser>[0]) => {
-      await toast.promise(projectApi.inviteUser(param), {
+  const memberInviteMutation = useMutation({
+    mutationFn: async (param: Parameters<typeof projectApi.memberInvite>[0]) => {
+      await toast.promise(projectApi.memberInvite(param), {
         loading: 'Inviting user...',
         success: 'User invited successfully',
         error: 'Failed to invite user',
@@ -74,7 +74,7 @@ export function ProjectAction(props: {
           <UserSelectionForm
             onSelect={(user) => {
               if (user?.id) {
-                inviteUserMutation.mutate({ projectId, inviteeId: user.id });
+                memberInviteMutation.mutate({ projectId, inviteeId: user.id });
                 setOpenAssignDialog(false);
               } else {
                 toast.error('Please select a valid user');

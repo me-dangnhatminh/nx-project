@@ -27,14 +27,20 @@ const listProjects = async (params: { page?: number; pageSize?: number; search?:
   return response.data;
 };
 
-const inviteUser = async (params: { projectId: string; inviteeId: string }) => {
-  const { projectId, inviteeId } = params;
-  const response = await axiosInstance.post(`/projects/${projectId}/invite`, { inviteeId });
+const deleteProject = async (projectId: string) => {
+  const response = await axiosInstance.delete(`/projects/${projectId}`);
   return response.data;
 };
 
-const deleteProject = async (projectId: string) => {
-  const response = await axiosInstance.delete(`/projects/${projectId}`);
+const projectMembers = async (projectId: string) => {
+  const response = await axiosInstance.get(`/projects/${projectId}/members`);
+  const data = response.data?.data || response.data;
+  return data;
+};
+
+const memberInvite = async (params: { projectId: string; inviteeId: string }) => {
+  const { projectId, inviteeId } = params;
+  const response = await axiosInstance.post(`/projects/${projectId}/members/invite`, { inviteeId });
   return response.data;
 };
 
@@ -42,6 +48,8 @@ export const projectApi = {
   get: getDetailProject,
   create: createProject,
   list: listProjects,
-  inviteUser,
   delete: deleteProject,
+
+  memberList: projectMembers,
+  memberInvite: memberInvite,
 };

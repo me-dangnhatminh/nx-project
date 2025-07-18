@@ -18,17 +18,17 @@ const StatusSequenceSchema = z
   .min(0, 'Sequence must be a non-negative integer')
   .max(1000, 'Sequence must be less than or equal to 1000');
 
-export const CreateStatusSchema = z.object({
+export const CreateIssueStatusSchema = z.object({
   name: StatusNameSchema,
   description: z.string().optional(),
   color: StatusColorSchema.optional(),
-  sequence: StatusSequenceSchema.optional(),
+  sequence: StatusSequenceSchema,
 });
 
-export const UpdateStatusSchema = z.object({
+export const UpdateIssueStatusSchema = z.object({
   name: StatusNameSchema.optional(),
-  description: z.string().optional(),
-  color: StatusColorSchema.optional(),
+  description: z.string().nullish(),
+  color: StatusColorSchema.nullish(),
   sequence: StatusSequenceSchema.optional(),
 });
 
@@ -49,7 +49,14 @@ export const ReorderStatusSchema = z.object({
   status: z.object({ id: z.string(), sequence: z.number() }),
 });
 
-export type CreateStatusInput = z.infer<typeof CreateStatusSchema>;
-export type UpdateStatusInput = z.infer<typeof UpdateStatusSchema>;
+export const IssueStatusUpdateSchema = z.object({
+  name: StatusNameSchema.optional(),
+  description: z.string().optional(),
+  color: StatusColorSchema.optional(),
+  sequence: StatusSequenceSchema.optional(),
+});
+
+export type CreateIssueStatusInput = z.infer<typeof CreateIssueStatusSchema>;
+export type UpdateIssueStatusInput = z.infer<typeof UpdateIssueStatusSchema>;
 export type StatusQueryInput = z.infer<typeof StatusQuerySchema>;
 export type ReorderStatusInput = z.infer<typeof ReorderStatusSchema>;
