@@ -202,12 +202,11 @@ model Issue {
 
 model IssueType {
     id          String  @id @default(cuid())
-    sequence    Int     @default(0) // Used for ordering issue types
+    sequence    Int     @default(0)
     name        String
     description String?
-    iconURL     String? // URL to an icon representing the issue type
-    avatarId    String?
-    color       String? // Color code for the issue type, e.g., #FF5733
+    iconURL     String?
+    color       String?
 
     projectId String // optimize in the future
 
@@ -224,7 +223,6 @@ model IssueStatus {
     description String?
     iconURL     String?
     color       String?
-    avatarId    String?
 
     projectId String // optimize in the future
 
@@ -237,12 +235,12 @@ model IssueStatus {
 model IssuePriority {
     id          String  @id @default(cuid())
     sequence    Int     @default(0)
-    name        String  @unique
+    name        String
     description String?
     iconURL     String?
     color       String?
 
-    projectId String
+    projectId String // optimize in the future
 
     issue   Issue[] @relation("IssuePriority")
     project Project @relation("ProjectIssuePriority", fields: [projectId], references: [id], onDelete: Cascade)

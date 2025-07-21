@@ -248,7 +248,7 @@ const BoardContainer: React.FC<{ projectId: string }> = ({ projectId }) => {
 
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId='all-columns' direction='horizontal' type='status'>
-            {(provided, snapshot) => (
+            {(provided) => (
               <div
                 className={cn(
                   'w-full flex overflow-x-auto gap-4',
@@ -259,7 +259,7 @@ const BoardContainer: React.FC<{ projectId: string }> = ({ projectId }) => {
               >
                 {issueStatuses.map((status, index) => (
                   <Draggable key={status.id} draggableId={status.id} index={index}>
-                    {(provided, snapshot) => (
+                    {(provided) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
@@ -291,11 +291,3 @@ const FullLoading = (props: { message?: string | React.ReactNode }) => {
     </div>
   );
 };
-// {/* Issue Detail Sheet */}
-// <IssueDetailSheet
-//   issue={selectedIssue}
-//   open={sheetOpen}
-//   onOpenChange={setSheetOpen}
-//   onUpdate={handleIssueUpdate}
-//   columns={columns}
-// />

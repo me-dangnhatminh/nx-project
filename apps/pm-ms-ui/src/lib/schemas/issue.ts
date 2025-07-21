@@ -8,15 +8,6 @@ export const IssueTypeSchema = z.object({
   avatarId: z.string().optional(),
 });
 
-const IssueKeySchema = z
-  .string()
-  .min(1, 'Key is required')
-  .max(20, 'Key must be less than 20 characters');
-const IssueSummarySchema = z
-  .string()
-  .min(1, 'Summary is required')
-  .max(200, 'Summary must be less than 200 characters');
-
 export const CreateIssueSchema = z.object({
   key: z.string().min(1, 'Key is required'),
   summary: z.string().min(1, 'Summary is required'),

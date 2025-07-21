@@ -2,16 +2,11 @@ import React, { useState, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { Input } from '@shadcn-ui/components/input';
 import { useUserSearch } from 'apps/pm-ms-ui/src/hooks/use-user';
+import { User } from 'apps/pm-ms-ui/src/lib/types';
 
 export type UserSelectionFormProps = {
   select?: { id: string; avatar?: string };
-  onSelect?: (user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    picture?: string;
-  }) => void;
+  onSelect?: (user: User) => void;
 };
 
 export const UserSelectionForm = ({ onSelect }: UserSelectionFormProps) => {

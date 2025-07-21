@@ -113,20 +113,13 @@ export default async function issueReorder(
 
       // Update issues with new ranks and optionally new status
       const updatePromises = source.ids.map((issueId, index) => {
-        const updateData: any = {
+        const updateData: { statusId?: string; rank: string; updatedAt: Date } = {
           rank: newRanks[index],
           updatedAt: new Date(),
         };
 
-        // Update status if specified
-        if (dest.statusId) {
-          updateData.statusId = dest.statusId;
-        }
-
-        return tx.issue.update({
-          where: { id: issueId },
-          data: updateData,
-        });
+        if (dest.statusId) updateData.statusId = dest.statusId;
+        return tx.issue.update({ where: { id: issueId }, data: updateData });
       });
 
       const updatedIssues = await Promise.all(updatePromises);

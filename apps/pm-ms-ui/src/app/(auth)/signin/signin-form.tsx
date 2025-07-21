@@ -1,12 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
 import { toast } from 'sonner';
 
 import { Button } from '@shadcn-ui/components/button';

@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import { Loader2, MoreHorizontal } from 'lucide-react';
+import { useCallback } from 'react';
+import { MoreHorizontal } from 'lucide-react';
 import { Button } from '@shadcn-ui/components/button';
 import {
   DropdownMenu,
@@ -10,12 +10,8 @@ import {
   DropdownMenuTrigger,
 } from '@shadcn-ui/components/dropdown-menu';
 
-import { useMutation } from '@tanstack/react-query';
-import { projectApi } from 'apps/pm-ms-ui/src/lib/api/project';
-import { useProjectPermissions } from 'apps/pm-ms-ui/src/hooks/use-permission';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { useMe } from 'apps/pm-ms-ui/src/hooks/use-user';
 import { useProjects } from 'apps/pm-ms-ui/src/hooks/use-project';
 
 export function ProjectActions(props: {
@@ -36,9 +32,9 @@ export function ProjectActions(props: {
     });
   }, [deleteProject]);
 
-  const { fetchMe } = useMe({ enabled: true });
-  const user = fetchMe.data;
-  const { fetchPermissions } = useProjectPermissions(props.projectId, user?.id || '');
+  // const { fetchMe } = useMe({ enabled: true });
+  // const user = fetchMe.data;
+  // const { fetchPermissions } = useProjectPermissions(props.projectId, user?.id || '');
 
   return (
     <>

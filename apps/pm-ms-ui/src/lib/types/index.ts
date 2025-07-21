@@ -1,4 +1,11 @@
-import { ProjectType as PrismaProjectType } from '@prisma/client';
+import {
+  Issue as PrismaIssue,
+  ProjectType as PrismaProjectType,
+  IssueType as PrismaIssueType,
+  IssuePriority as PrismaIssuePriority,
+  IssueStatus as PrismaIssueStatus,
+  Project as PrismaProject,
+} from '@prisma/client';
 
 export type User = {
   id: string;
@@ -9,62 +16,9 @@ export type User = {
 };
 
 export type ProjectType = PrismaProjectType;
-
-export type Project = {
-  id: string;
-  key: string;
-  name: string;
-  type: ProjectType;
-  leadId: string;
-  description?: string;
-  avatarId?: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type ProjectMember = {
-  user: User;
-  role: string;
-};
-
-export type IssueType = {
-  id: string;
-  name: string;
-  description?: string;
-  icon?: string;
-  color?: string;
-};
-
-export type IssueStatus = {
-  id: string;
-  name: string;
-  description?: string;
-  color?: string;
-  sequence: number;
-};
-
-export type IssuePriority = {
-  id: string;
-  name: string;
-  description?: string;
-  color?: string;
-};
-
-export type Issue = {
-  id: string;
-  key: string;
-  summary: string;
-  description?: string;
-  typeId: string;
-  statusId: string;
-  priorityId: string;
-  projectId: string;
-  reporterId?: string;
-  assigneeId?: string;
-  dueDate?: string;
-  resolutionId?: string;
-  createdAt: string;
-  updatedAt: string;
-
-  rank: string;
-};
+export type IssuePriority = PrismaIssuePriority;
+export type IssueStatus = PrismaIssueStatus;
+export type IssueType = PrismaIssueType;
+export type Issue = PrismaIssue;
+export type Project = Omit<PrismaProject, 'permissionSchemaId'>;
+export type ProjectMember = { user: User; role: string };

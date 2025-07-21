@@ -1,4 +1,4 @@
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import { prisma } from 'apps/pm-ms-ui/src/lib/prisma';
 import { JWTPayload, verifyToken } from 'apps/pm-ms-ui/src/lib/services/auth/auth-token';
 

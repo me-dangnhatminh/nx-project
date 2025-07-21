@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
+import { AxiosError } from 'axios';
 
 import { Button } from '@shadcn-ui/components/button';
 import { Input } from '@shadcn-ui/components/input';
@@ -42,19 +42,21 @@ export function SignUpForm() {
       router.push('/signin');
     },
     onError: (error) => {
-      const status = (error as any).response?.status; // TODO: fix
-      if (status === 409) {
-        form.setError('email', {
-          type: 'manual',
-          message: 'User with this email already exists',
-        });
-      } else {
-        const errMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
-        toast.error(errMsg, {
-          description: 'Please try again or contact support if the issue persists.',
-          duration: 2000,
-        });
+      if (error instanceof AxiosError) {
+        const status = error.response?.status;
+        if (status === 409) {
+          form.setError('email', {
+            type: 'manual',
+            message: 'User with this email already exists',
+          });
+          return;
+        }
       }
+      const errMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast.error(errMsg, {
+        description: 'Please try again or contact support if the issue persists.',
+        duration: 2000,
+      });
     },
   });
 

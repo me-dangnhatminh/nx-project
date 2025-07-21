@@ -5,6 +5,8 @@ import {
   getUserProjectPermissions,
 } from 'apps/pm-ms-ui/src/lib/services/permission';
 
+// FIXME: cập nhật cấu trúc
+
 export interface ProjectMember {
   id: string;
   user: {
@@ -94,16 +96,18 @@ async function getUserPermissionsForProject(
   projectId: string,
 ): Promise<Permission[]> {
   const permissions = await getUserProjectPermissions(userId, projectId);
+  return Object.values(permissions);
 
-  return permissions.map((permission) => ({
-    key: permission,
-    granted: true,
-    source: {
-      type: 'ROLE' as const,
-      id: 'PROJECT_ROLE',
-      name: 'Project Role',
-    },
-  }));
+  // return permissions
+  // .map((permission) => ({
+  //   key: permission,
+  //   granted: true,
+  //   source: {
+  //     type: 'ROLE' as const,
+  //     id: 'PROJECT_ROLE',
+  //     name: 'Project Role',
+  //   },
+  // }));
 }
 
 function mapToProjectMember(

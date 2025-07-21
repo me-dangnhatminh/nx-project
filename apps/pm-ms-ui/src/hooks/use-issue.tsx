@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { issueApi } from 'apps/pm-ms-ui/src/lib/api/issue';
 import { CreateIssueInput, ReorderIssueInput } from 'apps/pm-ms-ui/src/lib/schemas/issue';
@@ -173,8 +173,7 @@ export const useIssues = (
         return { previous: previousIssues };
       }
     },
-    onSuccess: (data, variables, context) => {},
-    onError: (error, input, context) => {
+    onError: (error, _input, context) => {
       if (context?.previous) setIssues(context.previous);
       console.error('Failed to reorder issues:', error);
     },

@@ -8,7 +8,8 @@
     "dtutool-ui:start": "nx start dtutool-ui",
     "dtutool-ui:analyze": "ANALYZE=true nx build dtutool-ui",
     "format:all": "nx format:write --all",
-    "pm-ms-ui:dev": "nx dev pm-ms-ui"
+    "pm-ms-ui:dev": "nx dev pm-ms-ui",
+    "pm-ms-ui:lint": "nx lint pm-ms-ui --no-fix"
   },
   "private": true,
   "packageManager": "pnpm@10.10.0",

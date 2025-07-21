@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { create } from 'zustand';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { projectApi } from 'apps/pm-ms-ui/src/lib/api/project';
-import { Project, User } from 'apps/pm-ms-ui/src/lib/types';
-import { CreateProjectInput, InviteUserInput } from 'apps/pm-ms-ui/src/lib/schemas/project';
+import { Project } from 'apps/pm-ms-ui/src/lib/types';
+import { CreateProjectInput } from 'apps/pm-ms-ui/src/lib/schemas/project';
 
 type SetProjects = React.Dispatch<React.SetStateAction<Project[]>>;
 const useProjectStore = create<{

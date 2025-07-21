@@ -360,7 +360,7 @@ export const TabCalendar: React.FC<TabCalendarProps> = ({
         className={cn(
           'p-0',
           'overflow-auto',
-          // TODO: fix
+          // FIXME: fix
         )}
       >
         <CalendarWrapper

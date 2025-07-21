@@ -3,19 +3,14 @@
 import { useState, useEffect } from 'react';
 import {
   User,
-  Mail,
   Calendar,
-  MapPin,
-  Briefcase,
   Edit,
   Save,
   X,
   Camera,
   Lock,
-  Bell,
   Shield,
   Activity,
-  Settings,
   Loader2,
   Eye,
   EyeOff,
@@ -37,7 +32,7 @@ import {
   SelectValue,
 } from '@shadcn-ui/components/select';
 import { toast } from 'sonner';
-import { projectsApi } from 'apps/pm-ms-ui/src/lib/api/project';
+import { projectApi } from 'apps/pm-ms-ui/src/lib/api/project';
 
 // Current user data based on login
 const currentUser = {

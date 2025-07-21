@@ -4,22 +4,14 @@ import { CreateIssueStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/issue-stat
 export default async function statusCreate(
   input: CreateIssueStatusInput,
   context: { userId: string; projectId: string },
-): Promise<void> {
+) {
   return await prisma.$transaction(
     async (tx) => {
       const { projectId } = context;
-
       const maxSequence = await tx.issueStatus.aggregate({ _max: { sequence: true } });
       const sequence = maxSequence._max.sequence ? maxSequence._max.sequence + 1 : 1;
-      const status = await prisma.issueStatus.create({
-        data: {
-          name: input.name,
-          projectId: projectId,
-          description: input.description || `Status: ${input.name}`,
-          color: input.color || '#6B7280', // Default gray color
-          sequence: sequence,
-        },
-      });
+      const status = await prisma.issueStatus.create({ data: { ...input, projectId, sequence } });
+      return status;
     },
     {
       isolationLevel: 'Serializable',
