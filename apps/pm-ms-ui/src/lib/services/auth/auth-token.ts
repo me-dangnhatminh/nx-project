@@ -5,6 +5,7 @@ const JWT_EXPIRES_IN = '7d';
 
 export type JWTPayload = {
   userId: string;
+  id: string;
   email: string;
   firstName: string;
   lastName: string;

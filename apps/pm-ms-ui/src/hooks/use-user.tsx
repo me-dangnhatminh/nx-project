@@ -1,18 +1,28 @@
 import { useQuery } from '@tanstack/react-query';
 import { userApi } from 'apps/pm-ms-ui/src/lib/api/user';
 
-export const useUser = (isLoggedIn: boolean = false) => {
+export const useMe = (options?: { enabled?: boolean }) => {
   const fetchMe = useQuery({
+    ...options,
     queryKey: ['user', 'me'],
     queryFn: () => userApi.getMe(),
-    enabled: isLoggedIn,
-    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  return {
-    fetchMe,
-  };
+  return { fetchMe };
 };
+
+// export const useUser = (isLoggedIn: boolean = false) => {
+//   const fetchMe = useQuery({
+//     queryKey: ['user', 'me'],
+//     queryFn: () => userApi.getMe(),
+//     enabled: isLoggedIn,
+//     staleTime: 1000 * 60 * 5, // 5 minutes
+//   });
+
+//   return {
+//     fetchMe,
+//   };
+// };
 
 export const useUserSearch = (text?: string) => {
   return useQuery({
@@ -26,4 +36,18 @@ export const useUserSearch = (text?: string) => {
     staleTime: 0,
     gcTime: 10000,
   });
+};
+
+export const useUser = (
+  userId: string,
+  params: { type: 'project' },
+  options?: { enabled?: boolean },
+) => {
+  const fetchUser = useQuery({
+    ...options,
+    queryKey: ['user', userId, params.type],
+    queryFn: () => userApi.getUser(userId, params),
+  });
+
+  return { fetchUser };
 };

@@ -21,7 +21,19 @@ const searchUser = async (text: string) => {
   };
 };
 
+const getUser = async (
+  userId: string,
+  params: {
+    type: 'project';
+  },
+) => {
+  const response = await axiosInstance.get(`/users/${userId}`, { params });
+  const data = response.data?.data || response.data;
+  return data;
+};
+
 export const userApi = {
+  getUser,
   getMe,
   searchUser,
 };

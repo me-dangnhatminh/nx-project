@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { statusApi } from 'apps/pm-ms-ui/src/lib/api/status';
-import { CreateIssueStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/status';
+import { CreateIssueStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/issue-status';
 import { create } from 'zustand';
 
 export type IssueStatus = {

@@ -25,8 +25,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: projectId } = await params;
     const cookie = await cookies();
     const userId = cookie.get('x-user-id')?.value;
     if (!userId) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const valid = CreateIssueSchema.parse(body);
 
-    await issueCreate({ issue: valid }, { requesterId: userId });
+    await issueCreate({ issue: valid }, { requesterId: userId, projectId });
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
     console.error('POST /api/issues error:', error);

@@ -1,4 +1,5 @@
 import { prisma } from '../../prisma';
+import qUser from './q-user';
 
 const getUserById = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -62,3 +63,5 @@ export const userServices = {
   findUserWithCredential,
   searchUser,
 };
+
+export { qUser };

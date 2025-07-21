@@ -1,9 +1,7 @@
 'use server';
 
-import { ProjectContainer } from './project-container';
-
-export default async function Page(props: { params: Promise<{ id: string }> }) {
-  const { id } = await props.params;
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   if (!id || typeof id !== 'string') throw new Error('Project ID is required');
-  return <ProjectContainer projectId={id} />;
+  return <div className='w-full h-full'>Welcome to the project {id} board page.</div>;
 }

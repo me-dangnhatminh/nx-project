@@ -12,6 +12,9 @@
   },
   "private": true,
   "packageManager": "pnpm@10.10.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@casl/ability": "^6.7.3",
     "@hello-pangea/dnd": "^18.0.1",

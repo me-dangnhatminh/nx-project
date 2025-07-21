@@ -14,9 +14,7 @@ const ProjectKeySchema = z
     'Project key must contain only uppercase letters, numbers, underscores, and hyphens',
   );
 
-const ProjectTypeSchema = z.enum(['SOFTWARE', 'MARKETING', 'RESEARCH', 'DESIGN', 'OTHER'], {
-  errorMap: () => ({ message: 'Invalid project type' }),
-});
+const ProjectTypeSchema = z.enum(['SOFTWARE', 'MARKETING', 'RESEARCH', 'DESIGN', 'OTHER']);
 
 const ProjectAvatarSchema = z.any();
 
@@ -40,10 +38,22 @@ export const UpdateProjectSchema = z.object({
 });
 
 export const InviteUserSchema = z.object({
-  projectId: z.string().min(1, 'Project ID is required'),
   inviteeId: z.string().min(1, 'Invitee ID is required'),
+  role: z.enum(['ADMIN', 'MEMBER', 'VIEWER']),
+});
+
+export const InviteProjectMemberSchema = z.object({
+  inviteeId: z.string().min(1, 'Invitee ID is required'),
+  role: z.enum(['ADMIN', 'MEMBER', 'VIEWER']),
+});
+
+export const UpdateProjectMemberSchema = z.object({
+  memberId: z.string().min(1, 'Member ID is required'),
+  role: z.enum(['ADMIN', 'MEMBER', 'VIEWER']),
 });
 
 export type CreateProjectInput = z.infer<typeof CreateProjectSchema>;
 export type UpdateProjectInput = z.infer<typeof UpdateProjectSchema>;
 export type InviteUserInput = z.infer<typeof InviteUserSchema>;
+export type InviteProjectMemberInput = z.infer<typeof InviteProjectMemberSchema>;
+export type UpdateProjectMemberInput = z.infer<typeof UpdateProjectMemberSchema>;

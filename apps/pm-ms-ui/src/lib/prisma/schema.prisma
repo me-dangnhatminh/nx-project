@@ -142,7 +142,7 @@ model Project {
     name               String
     url                String?
     leadId             String
-    description        String
+    description        String?
     type               ProjectType
     avatarId           String?
     permissionSchemaId String
@@ -207,6 +207,7 @@ model IssueType {
     description String?
     iconURL     String? // URL to an icon representing the issue type
     avatarId    String?
+    color       String? // Color code for the issue type, e.g., #FF5733
 
     projectId String // optimize in the future
 

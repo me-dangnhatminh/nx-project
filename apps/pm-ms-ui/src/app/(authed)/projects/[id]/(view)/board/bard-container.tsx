@@ -21,13 +21,13 @@ import { cn } from '@shared/utils';
 import {
   CreateIssueStatusInput,
   CreateIssueStatusSchema,
-} from 'apps/pm-ms-ui/src/lib/schemas/status';
+} from 'apps/pm-ms-ui/src/lib/schemas/issue-status';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form } from '@shadcn-ui/components/form';
 import { toast } from 'sonner';
-import { useProjectStatuses } from 'apps/pm-ms-ui/src/hooks/use-status';
-import { useProjectIssues } from 'apps/pm-ms-ui/src/hooks/use-issue';
+import { useIssues, useIssueStatues } from 'apps/pm-ms-ui/src/hooks/use-issue';
+import lexorank from 'apps/pm-ms-ui/src/lib/utils/lexorank';
 
 const CreateStatusDialog: React.FC<{
   onCreateStatus: (statusData: CreateIssueStatusInput) => Promise<void>;
@@ -136,89 +136,106 @@ const CreateStatusDialog: React.FC<{
 };
 
 const BoardContainer: React.FC<{ projectId: string }> = ({ projectId }) => {
-  const { statuses, fetchStatuses, createStatus, reorderStatus } = useProjectStatuses(projectId);
-  const { issues, setIssues } = useProjectIssues(projectId, {}, { enabled: false }); // all issues
+  const { issues, reorderIssue } = useIssues({ projectId }, { enabled: false }); // all issues
+  const { issueStatuses, fetchIssueStatuses, reorderIssueStatus, createIssueStatus } =
+    useIssueStatues(projectId);
 
   const handleDragEnd = useCallback(
     async (result: DropResult) => {
       const { destination, source, type, draggableId } = result;
 
       if (!destination) return;
+
       const isSameLocation = destination.droppableId === source.droppableId;
       const isSameIndex = destination.index === source.index;
       if (isSameLocation && isSameIndex) return;
 
-      if (type === 'column') {
-        const sequence = destination.index + 1;
-        reorderStatus.mutate(
-          { statusId: draggableId, sequence },
+      if (type === 'status') {
+        let destType: 'before' | 'after' | undefined = undefined;
+        let destParam: string | undefined = undefined;
+
+        const statusId = draggableId;
+        const otherStatuses = issueStatuses.filter((status) => status.id !== statusId);
+        if (destination.index === 0) {
+          if (otherStatuses.length > 0) {
+            destType = 'before';
+            destParam = otherStatuses[0].id;
+          } else {
+            destType = undefined;
+            destParam = undefined;
+          }
+        } else if (destination.index >= otherStatuses.length) {
+          destType = undefined;
+          destParam = undefined;
+        } else {
+          destType = 'after';
+          destParam = otherStatuses[destination.index - 1].id;
+        }
+
+        reorderIssueStatus.mutate(
+          { source: [{ id: statusId }], dest: { destType, destParam } },
           {
-            onSuccess: () => toast.success('Status reordered successfully'),
-            onError: () => toast.error('Failed to reorder status'),
+            onSuccess: () => toast.success('Status reordered successfully', { duration: 1000 }),
+            onError: () => toast.error('Failed to reorder status', { duration: 1000 }),
           },
         );
       }
 
       if (type === 'issue') {
-        const sourceColumnId = source.droppableId;
-        const destinationColumnId = destination.droppableId;
+        let destType: 'before' | 'after' | undefined = undefined;
+        let destParam: string | undefined = undefined;
 
-        const sourceColumn = statuses.find((s) => s.id === sourceColumnId);
-        const destinationColumn = statuses.find((s) => s.id === destinationColumnId);
+        const issueId = draggableId;
+        const newStatusId = destination.droppableId;
 
-        if (!sourceColumn || !destinationColumn) {
-          toast.error('Source or destination column not found');
-          return;
+        const targetStatusIssues = issues
+          .filter((issue) => issue.statusId === newStatusId && issue.id !== issueId)
+          .sort((a, b) => lexorank.compare(a.rank, b.rank));
+
+        if (destination.index === 0) {
+          // ✅ Đặt ở đầu danh sách trong status
+          if (targetStatusIssues.length > 0) {
+            destType = 'before';
+            destParam = targetStatusIssues[0].id;
+          } else {
+            // ✅ Status trống
+            destType = undefined;
+            destParam = undefined;
+          }
+        } else if (destination.index >= targetStatusIssues.length) {
+          // ✅ Đặt ở cuối danh sách trong status
+          destType = undefined;
+          destParam = undefined;
+        } else {
+          // ✅ Đặt ở giữa danh sách trong status
+          destType = 'after';
+          destParam = targetStatusIssues[destination.index - 1].id;
         }
 
-        const sourceIssues = issues.filter((issue) => issue.statusId === sourceColumn.id);
-        const destinationIssues = issues.filter((issue) => issue.statusId === destinationColumn.id);
-
-        const movedIssue = sourceIssues[source.index];
-        if (!movedIssue) {
-          toast.error('Issue not found in source column');
-          return;
-        }
-
-        // Nếu cùng column (reorder trong column)
-        if (sourceColumnId === destinationColumnId) {
-          const newOrder = Array.from(sourceIssues);
-          const [removed] = newOrder.splice(source.index, 1);
-          newOrder.splice(destination.index, 0, removed);
-
-          // Update lại toàn bộ sequence cho column đó
-          const updatedIssues = issues.map((issue) => {
-            if (issue.statusId !== sourceColumnId) return issue;
-            const idx = newOrder.findIndex((i) => i.id === issue.id);
-            return { ...issue, sequence: idx + 1 }; // FIXME: missig isues sequence
-          });
-
-          setIssues(updatedIssues);
-          return;
-        }
-
-        // Nếu di chuyển sang column khác
-        const newIssue = {
-          ...movedIssue,
-          statusId: destinationColumnId,
-          sequence: destinationIssues.length + 1,
-        };
-
-        const updatedIssues = issues.map((issue) =>
-          issue.id === movedIssue.id ? newIssue : issue,
+        reorderIssue.mutate(
+          {
+            source: { ids: [issueId] },
+            dest: {
+              statusId: newStatusId,
+              destType,
+              destParam,
+            },
+          },
+          {
+            onSuccess: () => toast.success('Issue moved successfully', { duration: 1000 }),
+            onError: () => toast.error('Failed to move issue', { duration: 1000 }),
+          },
         );
-
-        setIssues(updatedIssues);
       }
     },
-    [statuses, reorderStatus, projectId],
+    [issues, reorderIssueStatus, projectId],
   );
 
-  if (fetchStatuses.isPending) {
+  if (fetchIssueStatuses.isPending) {
     return <FullLoading message={'Loading project statuses...'} />;
   }
 
-  if (fetchStatuses.isError) {
+  if (fetchIssueStatuses.isError) {
     return <FullLoading message={'Failed to load project statuses. Please try again later.'} />;
   }
 
@@ -226,11 +243,11 @@ const BoardContainer: React.FC<{ projectId: string }> = ({ projectId }) => {
     <section className='w-full h-full'>
       <div className={cn('container mx-auto px-4 py-6', 'flex flex-col gap-4 h-full')}>
         <div className='flex justify-between items-center'>
-          <CreateStatusDialog onCreateStatus={(input) => createStatus.mutateAsync(input)} />
+          <CreateStatusDialog onCreateStatus={(input) => createIssueStatus.mutateAsync(input)} />
         </div>
 
         <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId='all-columns' direction='horizontal' type='column'>
+          <Droppable droppableId='all-columns' direction='horizontal' type='status'>
             {(provided, snapshot) => (
               <div
                 className={cn(
@@ -240,8 +257,8 @@ const BoardContainer: React.FC<{ projectId: string }> = ({ projectId }) => {
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
-                {statuses.map((column, index) => (
-                  <Draggable key={column.id} draggableId={column.id} index={index}>
+                {issueStatuses.map((status, index) => (
+                  <Draggable key={status.id} draggableId={status.id} index={index}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
@@ -249,7 +266,7 @@ const BoardContainer: React.FC<{ projectId: string }> = ({ projectId }) => {
                         {...provided.dragHandleProps}
                         className={cn('flex flex-col gap-2 min-w-[250px] max-w-[300px]')}
                       >
-                        <BoardColumn column={column} projectId={projectId} index={index} />
+                        <BoardColumn column={status} projectId={projectId} index={index} />
                       </div>
                     )}
                   </Draggable>

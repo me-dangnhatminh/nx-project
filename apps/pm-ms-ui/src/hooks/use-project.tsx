@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { create } from 'zustand';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { projectApi } from 'apps/pm-ms-ui/src/lib/api/project';
 import { Project, User } from 'apps/pm-ms-ui/src/lib/types';
+import { CreateProjectInput, InviteUserInput } from 'apps/pm-ms-ui/src/lib/schemas/project';
 
 type SetProjects = React.Dispatch<React.SetStateAction<Project[]>>;
 const useProjectStore = create<{
@@ -42,24 +43,27 @@ export const useProjects = () => {
     },
   });
 
-  return { projects, setProjects, fetchProjects };
-};
-
-export const useProjectMembers = (projectId: string) => {
-  const [members, setMembers] = useState<User[]>([]);
-
-  const fetchMembers = useQuery({
-    queryKey: [projectId, 'members'],
-    queryFn: async () => {
-      const data = await projectApi.memberList(projectId);
-      setMembers(data.items || []);
+  const createProject = useMutation({
+    mutationFn: async (newProject: CreateProjectInput) => {
+      const data = await projectApi.create(newProject);
+      setProjects((prev) => [...prev, data]);
       return data;
     },
   });
 
+  const deleteProject = useMutation({
+    mutationFn: async (projectId: string) => {
+      await projectApi.delete(projectId);
+      setProjects((prev) => prev.filter((p) => p.id !== projectId));
+    },
+  });
+
   return {
-    members,
-    setMembers,
-    fetchMembers,
+    projects,
+    setProjects,
+    fetchProjects,
+    createProject,
+    fetchProject: fetchProjects,
+    deleteProject,
   };
 };

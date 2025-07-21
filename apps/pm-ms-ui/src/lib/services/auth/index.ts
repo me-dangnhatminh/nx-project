@@ -24,6 +24,7 @@ export const authSignup = async (input: SignUpInput) => {
   });
 
   const token = await generateToken({
+    id: user.id,
     userId: user.id,
     email: user.email,
     firstName: user.firstName,
@@ -40,6 +41,7 @@ export const authSignin = async (input: SignInInput) => {
   const isPasswordValid = await compare(password, user.credential);
   if (!isPasswordValid) throw new Error(AUTH_ERRORS.INVALID_PASSWORD);
   const token = await generateToken({
+    id: user.id,
     userId: user.id,
     email: user.email,
     firstName: user.firstName,

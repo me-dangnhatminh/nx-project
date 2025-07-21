@@ -7,12 +7,11 @@ export async function POST(request: NextRequest) {
   try {
     const userId = request.cookies.get('x-user-id')?.value;
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     const formData = await request.formData();
     const body = Object.fromEntries(formData.entries());
     const valid = CreateProjectSchema.parse(body);
-    await projectCreate(valid);
-    return NextResponse.json({ message: 'Project created successfully' }, { status: 201 });
+    const result = await projectCreate(valid);
+    return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error(error);
     if (error instanceof z.ZodError) {

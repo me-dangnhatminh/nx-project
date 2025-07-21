@@ -36,9 +36,10 @@ import BoardColumnActions from './board-column-actions';
 import { toast } from 'sonner';
 import { CreateIssueInput, CreateIssueSchema } from 'apps/pm-ms-ui/src/lib/schemas/issue';
 import { Form } from '@shadcn-ui/components/form';
-import { useProjectIssues } from 'apps/pm-ms-ui/src/hooks/use-issue';
+import { useIssues } from 'apps/pm-ms-ui/src/hooks/use-issue';
 import { useProjectStatuses } from 'apps/pm-ms-ui/src/hooks/use-status';
 import { Issue, IssueStatus, User } from 'apps/pm-ms-ui/src/lib/types';
+import { Badge } from '@shadcn-ui/components/badge';
 
 interface AssigneeSelectProps {
   selectedUser?: User;
@@ -102,7 +103,10 @@ const CreateIssueForm: React.FC<{
   columnId: string;
   projectId: string;
 }> = ({ onSubmit, onCancel, columnId, projectId }) => {
-  const { createIssue } = useProjectIssues(projectId, { statusId: columnId });
+  const { createIssue } = useIssues({
+    projectId,
+    statusId: columnId,
+  });
 
   const generateIssueKey = useCallback(() => {
     const timestamp = Date.now();
@@ -117,7 +121,6 @@ const CreateIssueForm: React.FC<{
       typeId: DEFAULT_ISSUE_TYPE_ID,
       priorityId: DEFAULT_PRIORITY_ID,
       statusId: columnId,
-      projectId: projectId,
     },
   });
 
@@ -131,13 +134,12 @@ const CreateIssueForm: React.FC<{
   }, []);
 
   const handleSubmit = useCallback(
-    async (data: CreateIssueInput) => {
+    async (input: CreateIssueInput) => {
       if (createIssue.isPending) return;
-      data.key = generateIssueKey();
-      createIssue.mutate(data, {
+      createIssue.mutate(input, {
         onSuccess: () => {
           toast.success('Issue created successfully!');
-          onSubmit(data);
+          onSubmit(input);
         },
         onError: (error: any) => {
           console.error('Error creating issue:', error);
@@ -272,7 +274,7 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
   onColumnDelete,
 }) => {
   const { deleteStatus, renameStatus } = useProjectStatuses(projectId);
-  const { issues } = useProjectIssues(projectId, { statusId: column.id });
+  const { issues } = useIssues({ projectId, statusId: column.id });
 
   const [columnAction, setColumnAction] = useState<'rename' | 'delete' | null>(null);
 
@@ -293,7 +295,9 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
   return (
     <div className={cn('flex flex-col gap-4', 'bg-white rounded-lg p-3', 'border border-gray-200')}>
       <div hidden={!!columnAction} className='flex justify-between items-center'>
-        <h2 className='text-md font-semibold'>{column.name}</h2>
+        <Badge className='text-md font-semibold' style={{ backgroundColor: column.color }}>
+          {column.name}
+        </Badge>
         <BoardColumnActions
           column={column}
           onRename={() => setColumnAction('rename')}

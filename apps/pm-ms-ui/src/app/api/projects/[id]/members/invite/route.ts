@@ -16,9 +16,8 @@ export async function POST(request: NextRequest, { params }: Context) {
     const body = await request.json();
     const valid = InviteUserSchema.parse({ projectId, inviteeId: body.inviteeId });
 
-    await projectInvite({ ...valid, requesterId: userId });
-
-    return NextResponse.json({ message: 'User invited successfully' }, { status: 200 });
+    const result = await projectInvite(valid, { requesterId: userId, projectId });
+    return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.log(error);
     if (error instanceof z.ZodError) {

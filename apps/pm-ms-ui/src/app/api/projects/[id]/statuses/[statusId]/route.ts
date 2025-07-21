@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { UpdateIssueStatusSchema } from 'apps/pm-ms-ui/src/lib/schemas/status';
+import { UpdateIssueStatusSchema } from 'apps/pm-ms-ui/src/lib/schemas/issue-status';
 import { statusDelete, statusUpdate } from 'apps/pm-ms-ui/src/lib/services/status';
 import { cookies } from 'next/headers';
 import z from 'zod';

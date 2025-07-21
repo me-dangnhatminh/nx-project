@@ -557,7 +557,8 @@
 import issueCreate from './issue-create';
 import issueDelete from './issue-delete';
 import issueListBoard from './issue-list-board';
+import issueReorder from './issue-reorder';
 
 import gIssueList from './q-issue-list';
 
-export { issueCreate, issueListBoard, gIssueList, issueDelete };
+export { issueCreate, issueListBoard, gIssueList, issueDelete, issueReorder };

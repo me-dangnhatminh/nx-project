@@ -25,6 +25,14 @@ export const CreateIssueStatusSchema = z.object({
   sequence: StatusSequenceSchema,
 });
 
+export const ReorderIssueStatusSchema = z.object({
+  source: z.array(z.object({ id: z.string() })),
+  dest: z.object({
+    destType: z.enum(['before', 'after']).optional(),
+    destParam: z.string().optional(),
+  }),
+});
+
 export const UpdateIssueStatusSchema = z.object({
   name: StatusNameSchema.optional(),
   description: z.string().nullish(),
@@ -57,6 +65,8 @@ export const IssueStatusUpdateSchema = z.object({
 });
 
 export type CreateIssueStatusInput = z.infer<typeof CreateIssueStatusSchema>;
+export type ReorderIssueStatusInput = z.infer<typeof ReorderIssueStatusSchema>;
 export type UpdateIssueStatusInput = z.infer<typeof UpdateIssueStatusSchema>;
+
 export type StatusQueryInput = z.infer<typeof StatusQuerySchema>;
 export type ReorderStatusInput = z.infer<typeof ReorderStatusSchema>;

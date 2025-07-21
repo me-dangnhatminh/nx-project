@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { statusReorder } from 'apps/pm-ms-ui/src/lib/services/status';
 import { cookies } from 'next/headers';
-import { ReorderStatusSchema } from 'apps/pm-ms-ui/src/lib/schemas/status';
+import { ReorderStatusSchema } from 'apps/pm-ms-ui/src/lib/schemas/issue-status';
 import z from 'zod';
 
 type Context = { params: Promise<{ id: string }> };

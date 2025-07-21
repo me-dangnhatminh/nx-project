@@ -1,3 +1,5 @@
+import { ProjectType as PrismaProjectType } from '@prisma/client';
+
 export type User = {
   id: string;
   firstName: string;
@@ -6,14 +8,23 @@ export type User = {
   picture?: string;
 };
 
+export type ProjectType = PrismaProjectType;
+
 export type Project = {
   id: string;
   key: string;
   name: string;
+  type: ProjectType;
+  leadId: string;
   description?: string;
   avatarId?: string;
   createdAt: string;
   updatedAt: string;
+};
+
+export type ProjectMember = {
+  user: User;
+  role: string;
 };
 
 export type IssueType = {
@@ -29,6 +40,7 @@ export type IssueStatus = {
   name: string;
   description?: string;
   color?: string;
+  sequence: number;
 };
 
 export type IssuePriority = {
@@ -53,4 +65,6 @@ export type Issue = {
   resolutionId?: string;
   createdAt: string;
   updatedAt: string;
+
+  rank: string;
 };

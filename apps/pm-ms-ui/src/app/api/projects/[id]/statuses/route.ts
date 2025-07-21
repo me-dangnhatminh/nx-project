@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import z from 'zod';
 import { qStatusList, statusCreate } from 'apps/pm-ms-ui/src/lib/services/status';
-import { CreateStatusSchema } from 'apps/pm-ms-ui/src/lib/schemas/status';
+import { CreateStatusSchema } from 'apps/pm-ms-ui/src/lib/schemas/issue-status';
 
 type Context = { params: Promise<{ id: string }> };
 

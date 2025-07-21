@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../../lib/prisma';
-import { z } from 'zod';
-import { User } from 'apps/pm-ms-ui/src/lib/types';
+import { getProjectMembers } from 'apps/pm-ms-ui/src/lib/services/member';
 
-const AddMemberSchema = z.object({
-  userId: z.string(),
-  role: z.enum(['ADMIN', 'MEMBER', 'VIEWER']).default('MEMBER'),
-});
-
-// GET /api/projects/[id]/members - Get project members
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const projectId = await params.then((p) => p.id);
@@ -16,24 +8,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Invalid project ID' }, { status: 400 });
     }
 
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-      select: { id: true, permissionSchemaId: true },
-    });
-    if (!project) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
-    }
-
-    const roleActors = await prisma.projectRoleActor.findMany({
-      where: { projectId, roleType: 'USER' },
-    });
-    const userIds = roleActors.map((actor) => actor.roleParam);
-    const users = await prisma.user.findMany({
-      where: { id: { in: userIds } },
-      select: { id: true, firstName: true, lastName: true, email: true, avatar: true },
-    });
-
-    const result = { items: users, total: users.length };
+    const result = await getProjectMembers(projectId);
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error('Error fetching project members:', error);
@@ -130,3 +105,92 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   //   return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   // }
 }
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import { getProjectMembers } from 'apps/pm-ms-ui/src/lib/services/member';
+// import { checkAuthorization, AuthorizationError } from 'apps/pm-ms-ui/src/lib/guards/auth';
+// import { getAuthContext } from 'apps/pm-ms-ui/src/lib/utils/auth';
+// import { PermissionKey, ProjectRole } from '@prisma/client';
+
+// export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+//   try {
+//     const { id: projectId } = await params;
+//     if (!projectId || typeof projectId !== 'string') throw new Error('Invalid project ID');
+
+//     // Get authentication context
+//     const authContext = await getAuthContext();
+
+//     // Check authorization
+//     await checkAuthorization(authContext, projectId, {
+//       requireAuth: true,
+//       requireProjectMember: true,
+//       requirePermission: PermissionKey.BROWSE_PROJECTS,
+//     });
+
+//     // Parse query parameters
+//     const { searchParams } = new URL(request.url);
+//     const options = {
+//       page: parseInt(searchParams.get('page') || '1'),
+//       limit: Math.min(parseInt(searchParams.get('limit') || '10'), 100),
+//       role: searchParams.get('role') as ProjectRole | undefined,
+//       search: searchParams.get('search') || undefined,
+//       includePermissions: searchParams.get('includePermissions') !== 'false',
+//       includeInactive: searchParams.get('includeInactive') === 'true',
+//     };
+
+//     // Additional authorization for sensitive data
+//     if (options.includePermissions) {
+//       await checkAuthorization(authContext, projectId, {
+//         requirePermission: PermissionKey.ADMIN_PROJECTS,
+//       });
+//     }
+
+//     // Get members data
+//     const result = await getProjectMembers(projectId, options, authContext?.user.id);
+
+//     return NextResponse.json({
+//       success: true,
+//       data: result,
+//       meta: {
+//         timestamp: new Date().toISOString(),
+//         requestId: authContext?.requestId,
+//         requester: {
+//           id: authContext?.user.id,
+//           email: authContext?.user.email,
+//         },
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Error fetching project members:', error);
+
+//     if (error instanceof AuthorizationError) {
+//       return NextResponse.json(
+//         {
+//           success: false,
+//           error: {
+//             code: error.code,
+//             message: error.message,
+//           },
+//           meta: {
+//             timestamp: new Date().toISOString(),
+//           },
+//         },
+//         { status: error.statusCode },
+//       );
+//     }
+
+//     return NextResponse.json(
+//       {
+//         success: false,
+//         error: {
+//           code: 'FETCH_MEMBERS_FAILED',
+//           message: 'Failed to fetch members',
+//         },
+//         meta: {
+//           timestamp: new Date().toISOString(),
+//         },
+//       },
+//       { status: 500 },
+//     );
+//   }
+// }

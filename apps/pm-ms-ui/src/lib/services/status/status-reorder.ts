@@ -1,4 +1,4 @@
-import { ReorderStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/status';
+import { ReorderStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/issue-status';
 import { prisma } from 'apps/pm-ms-ui/src/lib/prisma';
 
 export default async function statusReorder(

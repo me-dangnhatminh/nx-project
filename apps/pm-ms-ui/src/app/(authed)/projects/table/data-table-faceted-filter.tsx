@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@shadcn-ui/components/p
 import { Separator } from '@shadcn-ui/components/separator';
 import { cn } from '@shared/utils';
 
-interface DataTableFacetedFilterProps<TData, TValue> {
+interface ProjectFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
   title?: string;
   options: {
@@ -31,7 +31,7 @@ export function DataTableFacetedFilter<TData, TValue>({
   column,
   title,
   options,
-}: DataTableFacetedFilterProps<TData, TValue>) {
+}: ProjectFacetedFilterProps<TData, TValue>) {
   const facets = column?.getFacetedUniqueValues();
   const selectedValues = new Set(column?.getFilterValue() as string[]);
 

@@ -5,15 +5,16 @@
 */
 
 import { prisma } from 'apps/pm-ms-ui/src/lib/prisma';
+import { InviteUserInput } from 'apps/pm-ms-ui/src/lib/schemas/project';
 
-export default async function projectInvite(input: {
-  requesterId: string;
-  projectId: string;
-  inviteeId: string;
-}): Promise<void> {
+export default async function projectInvite(
+  input: InviteUserInput,
+  context: { requesterId: string; projectId: string },
+) {
   return await prisma.$transaction(
     async (tx) => {
-      const { requesterId, projectId, inviteeId } = input;
+      const { requesterId, projectId } = context;
+      const { inviteeId, role } = input;
 
       // Kiểm tra xem người mời có quyền ADMIN trong dự án không
       const roleActor = await tx.projectRoleActor.findFirst({
@@ -34,8 +35,16 @@ export default async function projectInvite(input: {
 
       // Tạo lời mời
       await tx.projectRoleActor.create({
-        data: { projectId, roleType: 'USER', roleParam: existingUser.id, projectRole: 'MEMBER' },
+        data: { projectId, roleType: 'USER', roleParam: existingUser.id, projectRole: role },
       });
+
+      // ============== Response ============== //
+      const user = await tx.user.findUnique({
+        where: { id: existingUser.id },
+        select: { id: true, email: true, firstName: true, lastName: true },
+      });
+
+      return { data: user };
     },
     {
       isolationLevel: 'Serializable',

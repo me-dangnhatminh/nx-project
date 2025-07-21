@@ -1,4 +1,4 @@
-import { UpdateIssueStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/status';
+import { UpdateIssueStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/issue-status';
 import { axiosInstance } from './_base';
 
 type IssueRes = {

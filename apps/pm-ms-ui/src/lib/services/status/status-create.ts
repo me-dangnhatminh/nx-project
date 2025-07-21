@@ -1,5 +1,5 @@
 import { prisma } from 'apps/pm-ms-ui/src/lib/prisma';
-import { CreateIssueStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/status';
+import { CreateIssueStatusInput } from 'apps/pm-ms-ui/src/lib/schemas/issue-status';
 
 export default async function statusCreate(
   input: CreateIssueStatusInput,

@@ -18,18 +18,16 @@ const IssueSummarySchema = z
   .max(200, 'Summary must be less than 200 characters');
 
 export const CreateIssueSchema = z.object({
-  key: IssueKeySchema,
-  summary: IssueSummarySchema,
+  key: z.string().min(1, 'Key is required'),
+  summary: z.string().min(1, 'Summary is required'),
   description: z.string().optional(),
-  typeId: z.string().min(1, 'Type ID is required'),
   statusId: z.string().min(1, 'Status ID is required'),
-  priorityId: z.string().min(1, 'Priority ID is required'),
+  typeId: z.string().min(1, 'Type ID is required').optional(),
+  priorityId: z.string().min(1, 'Priority ID is required').optional(),
+  resolutionId: z.string().optional(),
   reporterId: z.string().optional(),
   assigneeId: z.string().optional(),
   dueDate: z.string().datetime().optional(),
-  resolutionId: z.string().optional(),
-  projectId: z.string().min(1, 'Project ID is required'),
-  archived: z.boolean().optional(),
 });
 
 export const UpdateIssueSchema = z.object({
@@ -45,6 +43,42 @@ export const UpdateIssueSchema = z.object({
   resolutionId: z.string().optional(),
   archived: z.boolean().optional(),
 });
+
+export const ReorderIssueSchema = z.object({
+  source: z.object({ ids: z.string().array().min(1, 'At least one source issue ID is required') }),
+  dest: z.object({
+    statusId: z.string().optional(),
+    destType: z.enum(['before', 'after']).optional(),
+    destParam: z.string().optional(),
+  }),
+});
+
+export type ReorderIssueInput = z.infer<typeof ReorderIssueSchema>;
+
+export const SourceIssueSchema = z.object({ id: z.string().min(1, 'Issue ID is required') });
+export const DestinationSchema = z
+  .object({ statusId: z.string() })
+  .or(
+    z.object({
+      destType: z.enum(['before', 'after']),
+      destParam: z.string().min(1, 'Destination parameter is required'),
+    }),
+  )
+  .or(
+    z.object({
+      statusId: z.string(),
+      destType: z.enum(['before', 'after']),
+      destParam: z.string().min(1, 'Destination parameter is required'),
+    }),
+  );
+
+export const IssueReorderSchema = z.object({
+  source: SourceIssueSchema.array().min(1, 'At least one source issue is required'),
+  dest: DestinationSchema,
+  projectId: z.string().min(1, 'Project ID is required'),
+});
+
+export type IssueReorderInput = z.infer<typeof IssueReorderSchema>;
 
 // Fix: Transform string values to appropriate types for query params
 export const IssueQuerySchema = z.object({
